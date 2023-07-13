@@ -16,23 +16,18 @@ log.full.conditional <- function(y, x,
                        Px, delta.mat,
                        f, a.f, b.f, 
                        pop.size){
-  # truncated_beta_density <- function(x, a, b, lower, upper) {
-  #   dbeta(x, a, b) / (pbeta(upper, a, b) - pbeta(lower, a, b))
-  # }
-  # 
-  # π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)π(I1)π(x1)
+
+  # mu(theta_1|x_1)mu(x1)π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)
   log.targ  <- log(dtruncnorm(alpha, a=0, b=Inf, mean = m.alpha, sd = sigma.alpha)) +
     log(dtruncnorm(beta, a=0, b=Inf, mean = m.beta, sd = sigma.beta)) + 
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
     dgamma(kappa, shape = a.kappa, rate = b.kappa, log=TRUE) +
     dgamma(lambda, shape = a.lambda , rate = b.lambda, log=TRUE) +
-    # dunif(p, min=a.p, max=b.p, log=TRUE) +
     log(dtruncnorm(p, a=a.p, b=b.p, mean = m.p, sd = sigma.p)) + 
     sum(DirichletReg::ddirichlet(Px, alpha=delta.mat,log=TRUE)) +
     sum(dunif(f, min=a.f, max=b.f, log=TRUE)) +
-    # log(truncated_beta_density(I[1], 1, 1/y[1], lower=y[1], upper=1-S[1]-E[1])) +
     DirichletReg::ddirichlet(matrix(c(S[1], E[1], I[1], R[1]), nrow=1, ncol=4), alpha=c(100,1,1,1),log=TRUE)+
-    log(1/nrow(parameters.CSMC.AS.repM$f))
+    log(1/nrow(f))
   
   
   # gψ (xt|xt−1) for t=2,...,T
@@ -45,7 +40,7 @@ log.full.conditional <- function(y, x,
   }
   log.targ <- log.targ + sum(log(df$trans.prob))
   
-  # fψ(yt|θt, xt) from t=1,...T; gψ(θt|θt−1, xt) from t=2,...,T
+  # hψ(yt|θt, xt) from t=1,...T; gψ(θt|θt−1, xt) from t=2,...,T
   log.targ <- log.targ + log.obs.density(y[1], I[1], lambda, p)
   runge.kutta <- matrix(NA, nrow=4, ncol=T-1)
   log.dirichlet.density <- matrix(NA, nrow=1, ncol=T-1)

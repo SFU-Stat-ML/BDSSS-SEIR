@@ -1,6 +1,6 @@
 
 
-# Observation density f(yt|xt=[St,Et,Rt,It]')
+# Observation density 
 
 obs.density <- function(yt, It, lambda, p){
   

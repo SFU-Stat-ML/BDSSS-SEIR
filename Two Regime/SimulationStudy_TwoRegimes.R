@@ -101,12 +101,11 @@ for (t in 2:(T+1)) {
   
 }
 
-library(ggplot2)
-library(RColorBrewer)
+library("ggplot2")
+library("RColorBrewer")
 display.brewer.all()  # check color pallette
 
 ##### Draw simulated Y_t and I_t
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/TwoRegimeSimulatedData_seed", seed, "_T",T+1, ".pdf"), width = 12, height = 5)
 par(mfrow=c(1,1))
 plot(as.vector(y), 
      type = "p", 
@@ -120,8 +119,6 @@ plot(as.vector(y),
 lines(theta[3,]*p, type = "l", col = "gray20", lwd=2)
 
 # Identify different regimes using colored background
-
-## Observed true regimes
 library("R.utils")
 fromto.x1 <- seqToIntervals(which(x==1))
 for (i in 1:nrow(fromto.x1)){
@@ -145,14 +142,11 @@ legend("topleft",
        pch=c(20, NA),
        cex=1.2)
 
-dev.off()
 
 
 ##### Draw S_t, E_t, I_t, R_t
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/TwoRegimeSimulatedSEIR_seed", seed, "_T",T+1, ".pdf"), width = 10, height = 7)
-
-# display.brewer.all() 
-SEIR_colors <- c("#80B1D3", "#B3DE69", "#FB8072", "#BEBADA")  # set the number of colors and the palette name
+# Set the number of colors and the palette name
+SEIR_colors <- c("#80B1D3", "#B3DE69", "#FB8072", "#BEBADA")  
 
 # Convert theta to a data frame
 theta_df <- data.frame(
@@ -184,10 +178,8 @@ ggplot(theta_long, aes(x = time, y = value, color = variable)) +
     legend.title = element_blank()
   ) +
   ggtitle("Simulated Dynamics of SEIR") +
-  scale_y_continuous(labels = function(x) sprintf("%.2f", x)) +
-  coord_cartesian(ylim = c(0, 1))  # Set the vertical limits here
+  scale_y_continuous(labels = function(x) sprintf("%.2f", x)) 
 
-dev.off()
 
 #################### Save simulated data and model parameters ####################
 # Save simulated data and model parameters
@@ -196,7 +188,7 @@ sim_data <- list(seed = seed, theta = theta, y = y, x = x, regimes = regimes,
                  lambda = lambda, kappa = kappa, p = p, f = f, Px = Px, T = T)
 
 saveRDS(sim_data, 
-        file = paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Two Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
+        file = paste0("../Data/Simulation Data/Two Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
 
 
 # -------------------------- II. Run PG-CSMC-AS  ---------------------------------#
@@ -208,7 +200,7 @@ cl <- makeCluster(6)
 registerDoParallel(cl)
 
 # Read in data
-sim_data <- readRDS(file = "~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
+sim_data <- readRDS(file = "../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
 y <- sim_data$y
 regimes <- sim_data$regimes
 lenXset <- length(regimes)
@@ -217,8 +209,8 @@ lenXset <- length(regimes)
 nchain  <- 2    
 
 # Number of MCMC iterations
-burnin <- 1000
-niter   <- 10000 + burnin      # number of MCMC iterations
+burnin <- 100
+niter   <- 1000 + burnin      # number of MCMC iterations
 
 # Number of theta_t for each x_t 
 M <- 50                  
@@ -244,13 +236,12 @@ hyperparams <- list(
   b.f = 1) 
 
 # Load the script that contains the PG.CSMC.AS() function
-source("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Code/Two Regime/ParticleGibbs_TwoRegime.R")
+source("ParticleGibbs_TwoRegime.R")
 
+# Run PG sampler
 ptm <- proc.time() 
 PG.results <- foreach(i = 1:nchain, .combine = "list", .packages = c("truncnorm", "DirichletReg")) %dopar% {
-  # Run PG sampler
   PG.CSMC.AS(y, regimes, M, niter, hyperparams, pop.size=1)
-  
 } 
 proc.time()-ptm 
 
@@ -258,15 +249,6 @@ stopCluster(cl)
 
 # Show contents of PG.results
 str(PG.results)
-
-# Save results to local file
-setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Two Regime")
-saveRDS(hyperparams, paste0("PG_results_hyperparams_pUnknown_seed", sim_data$seed, "_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
-saveRDS(PG.results, paste0("PG_results_pUnknown_seed", sim_data$seed, "_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
-
-# # Read results
-# hyperparams <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Two Regime/PG_results_hyperparams_seed1580_niter11000_M50_K2.rds")
-PG.results <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Two Regime/PG_results_pUnknown_seed1580_niter11000_M50_K2.rds")
 
 # Extract results from each chain 
 MCMC.chain.1 <- PG.results[[1]]
@@ -292,7 +274,7 @@ marginalLogLik.CSMC.AS.repM <- MCMC.chain.2$marginalLogLik.CSMC.AS.repM
 
 
 ############################ Data Visualization #######################################
-sim_data <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
+sim_data <- readRDS("../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
 seed <- sim_data$seed
 alpha <- sim_data$alpha
 beta <- sim_data$beta
@@ -309,8 +291,7 @@ T <- sim_data$T
 regimes <- sim_data$regimes
 lenXset <- length(sim_data$regimes)
 
-# Trace plot of parameters'
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/", Sys.Date(), " SimulationTwoRegimeTracePlot_seed", seed, "_T", T+1, ".pdf"), width = 12, height = 10)
+### Trace plot of parameters
 par(mfrow=c(4,2))
 plot(parameters.CSMC.AS.repM$alpha[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(alpha), panel.first=abline(h = alpha, col = "red"))
 plot(parameters.CSMC.AS.repM$beta[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(beta), panel.first=abline(h = beta, col = "red"))
@@ -318,7 +299,6 @@ plot(parameters.CSMC.AS.repM$gamma[1, burnin:niter], type="l", xlab="Iterations"
 plot(parameters.CSMC.AS.repM$kappa[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(kappa), panel.first=abline(h = kappa, col = "red"), ylim=c(1000, 12000))
 plot(parameters.CSMC.AS.repM$lambda[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(lambda), panel.first=abline(h = lambda, col = "red"))
 plot(parameters.CSMC.AS.repM$p[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(p), panel.first=abline(h = p, col = "red"))
-# plot(parameters.CSMC.AS.repM$f[1, ], type="l", xlab="Iterations", ylab = expression(f[1]), panel.first=abline(h = f[1,1], col = "red"))
 plot(parameters.CSMC.AS.repM$f[2, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[2]), panel.first=abline(h = f[2,1], col = "red"))
 
 post.pi.k1 <- matrix(0, niter, lenXset, byrow=TRUE)
@@ -337,20 +317,8 @@ plot(post.pi.k1[burnin:(niter-1),1],
      ylab = expression(pi[11]),
      # ylim = c(0.6, 1),
      panel.first=abline(h = Px[1,1], col = "red")) # pi_11
-# plot(post.pi.k1[1:(niter-1),2],
-#      type="l",
-#      xlab="Iterations",
-#      ylab = expression(pi[12]),
-#      #  ylim = c(0, 0.5),
-#      panel.first=abline(h = Px[1,2], col = "red")) # pi_12
-
 
 # pi_{k2}
-# plot(post.pi.k2[1:(niter-1),1],
-#      type="l",
-#      xlab="Iterations",
-#      ylab = expression(pi[21]),
-#      panel.first=abline(h = Px[2,1], col = "red")) # pi_21
 plot(post.pi.k2[burnin:(niter-1),2],
      type="l",
      xlab="Iterations",
@@ -360,8 +328,7 @@ plot(post.pi.k2[burnin:(niter-1),2],
 dev.off()
 
 
-# Histogram of parameters
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/", Sys.Date(), " SimulationTwoRegimeHistogram_seed", seed, "_T", T+1, ".pdf"), width = 10, height = 7)
+### Histogram of parameters
 par(mfrow=c(3,3))
 
 # Define colors
@@ -381,7 +348,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = alpha, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$alpha[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$alpha[burnin:niter]), col = blue, lwd = 2)
 alpha.CI <- quantile(parameters.CSMC.AS.repM$alpha[burnin:niter], c(0.025, 0.975))
 abline(v = alpha.CI, col = blue, lty = 2, lwd = 2)
@@ -415,7 +381,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = gamma, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$gamma[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$gamma[burnin:niter]), col = blue, lwd = 2)
 gamma.CI <- quantile(parameters.CSMC.AS.repM$gamma[burnin:niter], c(0.025, 0.975))
 abline(v = gamma.CI, col = blue, lty = 2, lwd = 2)
@@ -434,7 +399,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = kappa, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$kappa[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$kappa[burnin:niter]), col = blue, lwd = 2)
 kappa.CI <- quantile(parameters.CSMC.AS.repM$kappa[burnin:niter], c(0.025, 0.975))
 abline(v = kappa.CI, col = blue, lty = 2, lwd = 2)
@@ -451,7 +415,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = lambda, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$lambda[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$lambda[burnin:niter]), col = blue, lwd = 2)
 lambda.CI <- quantile(parameters.CSMC.AS.repM$lambda[burnin:niter], c(0.025, 0.975))
 abline(v = lambda.CI, col = blue, lty = 2, lwd = 2)
@@ -468,7 +431,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = p, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$p[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$p[burnin:niter]), col = blue, lwd = 2)
 p.CI <- quantile(parameters.CSMC.AS.repM$p[burnin:niter], c(0.025, 0.975))
 abline(v = p.CI, col = blue, lty = 2, lwd = 2)
@@ -485,7 +447,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = f[2,1], col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$f[2,burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$f[2,burnin:niter]), col = blue, lwd = 2)
 f2.CI <- quantile(parameters.CSMC.AS.repM$f[2,burnin:niter], c(0.025, 0.975))
 abline(v = f2.CI, col = blue, lty = 2, lwd = 2)
@@ -502,7 +463,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[1,1], col = red, lwd = 2)
-# abline(v = median(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 pi11.CI <- quantile(post.pi.k1[burnin:(niter-1),1], c(0.025, 0.975))
 abline(v = pi11.CI, col = blue, lty = 2, lwd = 2)
@@ -520,96 +480,30 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[2,2], col = red, lwd = 2)
-# abline(v = median(post.pi.k2[burnin:(niter-1),2]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k2[burnin:(niter-1),2]), col = blue, lwd = 2)
 pi22.CI <- quantile(post.pi.k2[burnin:(niter-1),2], c(0.025, 0.975))
 abline(v = pi22.CI, col = blue, lty = 2, lwd = 2)
 
-dev.off()
 
 
 
-## 95% Credible Interval of posterior samples
-S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+
+### 95% Credible Interval of posterior samples for SEIR
+S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 S.CredInterval.LL <- S.CredInterval[,1]
 S.CredInterval.UL <- S.CredInterval[,2]
-E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 E.CredInterval.LL <- E.CredInterval[,1]
 E.CredInterval.UL <- E.CredInterval[,2]
-I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 I.CredInterval.LL <- I.CredInterval[,1]
 I.CredInterval.UL <- I.CredInterval[,2]
-R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 R.CredInterval.LL <- R.CredInterval[,1]
 R.CredInterval.UL <- R.CredInterval[,2]
 
 
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/", Sys.Date(), " TwoRegimeEstimatedSEIR_seed", seed, "_T", T+1, ".pdf"), width = 10, height = 10)
-
 par(mfrow=c(2,2), mar=c(4, 4, 2, 2), mgp=c(2, 0.7, 0))
-
-
-# # S plot
-# plot(colMeans(SsampleMat.CSMC.AS.repM),
-#      xlab="Time",
-#      type = "l",
-#      ylab = "Proportion",
-#      col= "darkgrey",
-#      lwd = 1.5,
-#      ylim=c(0,1),
-#      main="Susceptible (S)")
-# lines(as.vector(theta[1,]), col= "black", lwd = 1.5, lty = 1)
-# lines(S.CredInterval.LL, col= "darkgrey", lwd = 1.5, lty = 2)
-# lines(S.CredInterval.UL, col= "darkgrey", lwd = 1.5, lty = 2)
-# 
-# # E plot
-# plot(colMeans(EsampleMat.CSMC.AS.repM),
-#      xlab="Time",
-#      type = "l",
-#      ylab = "Proportion",
-#      col="darkgrey",
-#      lwd = 1.5,
-#      ylim=c(0, 0.1),
-#      main="Exposed (E)")
-# lines(as.vector(theta[2,]), col= "black", lwd = 1.5, lty = 1)
-# lines(E.CredInterval.LL, col= "darkgrey", lwd = 1.5, lty = 2)
-# lines(E.CredInterval.UL, col= "darkgrey", lwd = 1.5, lty = 2)
-# 
-# # I plot
-# plot(colMeans(IsampleMat.CSMC.AS.repM),
-#      xlab="Time",
-#      type = "l",
-#      ylab = "Proportion",
-#      col="darkgrey",
-#      ylim=c(0,0.1),
-#      main="Infected (I)")
-# lines(as.vector(theta[3,]), col= "black", lwd = 1.5, lty = 1)
-# lines(I.CredInterval.LL, col= "darkgrey", lwd = 1.5, lty = 2)
-# lines(I.CredInterval.UL, col= "darkgrey", lwd = 1.5, lty = 2)
-# 
-# # R plot
-# plot(colMeans(RsampleMat.CSMC.AS.repM),
-#      xlab="Time",
-#      type = "l",
-#      ylab = "Proportion",
-#      col="darkgrey",
-#      ylim=c(0,1),
-#      main="Recovered (R)")
-# lines(as.vector(theta[4,]), col= "black", lwd = 1.5, lty = 1)
-# lines(R.CredInterval.LL, col= "darkgrey", lwd = 1.5, lty = 2)
-# lines(R.CredInterval.UL, col= "darkgrey", lwd = 1.5, lty = 2)
-# 
-# # Increase font size of plot labels and titles
-# par(cex.lab=1.2, cex.main=1.5)
-# 
-# # Add legend
-# legend("topright",
-#        legend = c("True Value", "Posterior Mean", "95% CI"),
-#        lty = c(1, 2, 2),
-#        lwd = c(1.5, 1.5, 1.5),
-#        col = c("black", "darkgrey", "darkgrey"),
-#        bty = "n",
-#        cex = 1.2)
 
 ## S plot
 # Compute the x and y coordinates for the shaded area
@@ -618,7 +512,7 @@ y_lower <- S.CredInterval.LL
 y_upper <- S.CredInterval.UL
 
 # Plot the mean trajectory
-plot(colMeans(SsampleMat.CSMC.AS.repM[burnin:(niter-1),]),
+plot(colMeans(SsampleMat.CSMC.AS.repM[burnin:niter,]),
      xlab = "Time",
      type = "l",
      ylab = "Proportion",
@@ -645,7 +539,7 @@ y_lower <- E.CredInterval.LL
 y_upper <- E.CredInterval.UL
 
 # Plot the mean trajectory
-plot(colMeans(EsampleMat.CSMC.AS.repM[burnin:(niter-1),]),
+plot(colMeans(EsampleMat.CSMC.AS.repM[burnin:niter,]),
      xlab = "Time",
      type = "l",
      ylab = "Proportion",
@@ -675,7 +569,7 @@ y_lower <- I.CredInterval.LL
 y_upper <- I.CredInterval.UL
 
 # Plot the mean trajectory
-plot(colMeans(IsampleMat.CSMC.AS.repM[burnin:(niter-1),]),
+plot(colMeans(IsampleMat.CSMC.AS.repM[burnin:niter,]),
      xlab = "Time",
      type = "l",
      ylab = "Proportion",
@@ -705,7 +599,7 @@ y_lower <- R.CredInterval.LL
 y_upper <- R.CredInterval.UL
 
 # Plot the mean trajectory
-plot(colMeans(RsampleMat.CSMC.AS.repM[burnin:(niter-1),]),
+plot(colMeans(RsampleMat.CSMC.AS.repM[burnin:niter,]),
      xlab = "Time",
      type = "l",
      ylab = "Proportion",
@@ -737,75 +631,13 @@ legend("topright",
        bty = "n",
        cex = 1.2)
 
-dev.off()
 
 
 
-# Posterior I_t
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Two Regime/", Sys.Date(), " TwoRegimeEstimatedIt_seed", seed, "_T", T+1, ".pdf"), width = 10, height = 7)
-par(mfrow=c(1,1))
-plot(1:length(y), y, type = "p", col = "grey", pch=20, ylab = "Proportion Infected", ylim=c(0,0.03))
-# lines(1:(T+1), theta[3,]*p, col="red")
-lines(1:length(y), apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, mean), col="grey")
-lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-dev.off()
-
-
-
-## Observed true regimes
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Two Regime/", Sys.Date(), " TwoRegimeEstimatedXt.pdf"), width = 12, height = 8)
-# par(mfrow=c(2,1))
-# 
-# plot(1:length(y), y, type = "p", 
-#      lty = 1, col = "#BDBDBD", pch = 20, 
-#      ylim = c(0,0.02), xlab = "Time",
-#      main = "True Regimes", cex = 1.5)
-# lines(theta[3,]*p, type = "l", col = "indianred", lwd=2)
-# 
-# library("R.utils")
-# fromto.x1 <- seqToIntervals(which(x==1))
-# for (i in 1:nrow(fromto.x1)){
-#   rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
-#        col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
-# }
-# 
-# fromto.x2 <- seqToIntervals(which(x==2))
-# for (i in 1:nrow(fromto.x2)){
-#   rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
-#        col = rgb(0.5,0.5,0.5,1/3), border = rgb(0.5,0.5,0.5,1/3))
-# }  
-# 
-# # Estimated X_t
-# plot(1:length(y), y, type = "p", lty = 1, 
-#      col = "#BDBDBD", pch = 20,  ylim = c(0,0.02), 
-#      xlab = "Time", main = "Estimated Regimes", cex = 1.5)
-# lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, median), col="black")
-# lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="black", lty = 2)
-# lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="black", lty = 2)
-# 
-# est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM == 1)/niter,
-#                          "prob.x2" = colSums(XsampleMat.CSMC.AS.repM == 2)/niter)
-# est.x <- apply(est.prob.x, 1, which.max)
-# 
-# library("R.utils")
-# fromto.x1 <- seqToIntervals(which(est.x==1))
-# for (i in 1:nrow(fromto.x1)){
-#   rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
-#        col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
-# }
-# 
-# fromto.x2 <- seqToIntervals(which(est.x==2))
-# for (i in 1:nrow(fromto.x2)){
-#   rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
-#        col = rgb(0.5,0.5,0.5,1/3), border = rgb(0.5,0.5,0.5,1/3))
-# }  
-
-
-# Create a new plot with two subplots side by side
+### True regimes versus Estimated regimes
 par(mfrow = c(2, 1))
 
-# Plot True Regimes
+## Plot True Regimes
 plot(1:length(y), y, type = "p", 
      lty = 1, col = "gray50", pch = 20, 
      ylim = c(0, 0.02), xlab="",
@@ -825,18 +657,16 @@ for (i in 1:nrow(fromto.x2)){
        col = rgb(0.9, 0.6, 0.6, 1/3), border = rgb(0.9, 0.6, 0.6, 1/3))
 }  
 
-# Plot Estimated Regimes
+## Plot Estimated Regimes
 plot(1:length(y), y, type = "p", lty = 1, 
      col = "gray50", pch = 20,  ylim = c(0, 0.02), 
      xlab = "Time", main = "", cex = 1.5)
-lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, median), col = "#969696", lwd=2.5, lty=1)
-# lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col = "#969696", lty = 2, lwd=1.5)
-# lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col = "#969696", lty = 2, lwd=1.5)
+lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p[burnin:niter]), 2, median), col = "#969696", lwd=2.5, lty=1)
 
 # Compute the x and y coordinates for the shaded area
-xx <- 1:length(apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, median))
-y_lower <- I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p)
-y_upper <- I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p)
+xx <- 1:length(apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p[burnin:niter]), 2, median))
+y_lower <- I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p[burnin:niter])
+y_upper <- I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p[burnin:niter])
 
 # Plot the shaded area for the credible interval
 polygon(c(xx, rev(xx)), 
@@ -845,8 +675,8 @@ polygon(c(xx, rev(xx)),
         border = NA)
 
 # Plot regimes
-est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM == 1)/niter,
-                         "prob.x2" = colSums(XsampleMat.CSMC.AS.repM == 2)/niter)
+est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
+                         "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin))
 est.x <- apply(est.prob.x, 1, which.max)
 
 library("R.utils")
@@ -862,29 +692,7 @@ for (i in 1:nrow(fromto.x2)){
        col = rgb(0.9, 0.6, 0.6, 1/3), border = rgb(0.9, 0.6, 0.6, 1/3))
 }  
                  
-                 
-# # Estimated X_t
-# plot(colSums(XsampleMat.CSMC.AS.repM == 1)/niter,
-#      type = "l",
-#      # xlim = c(20, T),
-#      ylim = c(0, 1),            # Adjust accordingly!
-#      xlab = paste("Data of length T =", T+1),
-#      ylab = "Probability",
-#      main = expression('Estimated P(X'[t]*'|y'[1:T]*')'),
-#      col = "grey")
-# lines(colSums(XsampleMat.CSMC.AS.repM == 2)/niter, col= blue)
-# 
-# # Add legend
-# legend("topright",
-#        legend=c(expression('P(X'[t]*'=1|y'[1:T]*')'), expression('P(X'[t]*'=2|y'[1:T]*')')),
-#        col=c("grey", blue),
-#        lty=1,
-#        bty="n",
-#        cex=0.8)
-dev.off()
-
 
 ## Marginal likelihood
 mean(marginalLogLik.CSMC.AS.repM)
-plot(1:niter, marginalLogLik.CSMC.AS.repM, type="l")
 

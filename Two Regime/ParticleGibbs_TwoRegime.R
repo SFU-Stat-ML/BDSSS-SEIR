@@ -29,7 +29,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   lenXset <- length(regimes)
   N <- M*lenXset 
   
-  # Set up matrices to store particles
+  ### Set up matrices to store particles, parameters, and marginal log likelihood
   SsampleMat.CSMC.AS.repM <- matrix(0, niter, T+1, byrow = TRUE)
   EsampleMat.CSMC.AS.repM <- matrix(0, niter, T+1, byrow = TRUE)
   IsampleMat.CSMC.AS.repM <- matrix(0, niter, T+1, byrow = TRUE)
@@ -48,9 +48,9 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   marginalLogLik.CSMC.AS.repM <- matrix(0, 1, niter, byrow = TRUE)
   
   
-  # Prior distributions for ψ = {α, β, γ, λ, κ, PX , fxt, }
+  ### Prior distributions for ψ 
   
-  ### Hyperparameters setting
+  ## Hyperparameters setting
   m.alpha <- hyperparams$m.alpha
   sigma.alpha <- hyperparams$sigma.alpha
   m.beta <- hyperparams$m.beta
@@ -70,24 +70,24 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   b.f <- hyperparams$b.f
   
   
-  # (1) Initialisation, r=0
-  # Choose psi arbitrarily, and draw {theta^(b_0:T)_0:T,x^(b_0:T)_0:T} from {Theta_0:T,X_0:T,A_1:T}
+  ### (1) Initialisation, r=0
+  ## Choose psi arbitrarily, and draw {theta^(b_0:T)_0:T,x^(b_0:T)_0:T} from {Theta_0:T,X_0:T,A_1:T}
   r = 1
   print(paste('PG-CSMC-AS-repM: iteration ', r))
   
   ## Arbitrarily generate psi from prior distributions
-  ### SEIR model parameters: alpha, beta, gamma
+  # SEIR model parameters: alpha, beta, gamma
+  library("truncnorm")
   (parameters.CSMC.AS.repM$alpha[1,r] <- rtruncnorm(1, a=0, b=Inf, mean = m.alpha, sd = sigma.alpha))
   (parameters.CSMC.AS.repM$beta[1,r] <- rtruncnorm(1, a=0, b=Inf, mean = m.beta, sd = sigma.beta))
   (parameters.CSMC.AS.repM$gamma[1,r] <- rtruncnorm(1, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma))
   
   
-  ### Precision parameters: lambda, kappa
+  # Precision parameters: lambda, kappa
   (parameters.CSMC.AS.repM$lambda[1,r] <- rgamma(1, shape = a.lambda, rate = b.lambda))  # mean = a.lambda/b.lambda
   (parameters.CSMC.AS.repM$kappa[1,r] <- rgamma(1, shape = a.kappa, rate = b.kappa))
-  # (parameters.CSMC$kappa[1,r] <- 2000)
-  
-  ### Transition probability matrix: Px
+
+  # Transition probability matrix: Px
   library("gtools")
   (parameters.CSMC.AS.repM$Px[[r]] <-matrix(t(DirichletReg::rdirichlet(lenXset, delta.mat)), 
                                               nrow = lenXset, 
@@ -95,17 +95,16 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                               byrow = TRUE))
   
   
-  ### Transmission Rate modifier: f_{x_t}
+  # Transmission Rate modifier: f_{x_t}
   (parameters.CSMC.AS.repM$f[,r] <- c(1, 
                                       runif(1, min=a.f, max=b.f)))
   
   
-  ### Detection Rate: p
-  # (parameters.CSMC.AS.repM$p[1,r] <- runif(1, min=a.p, max=b.p))
+  # Detection Rate: p
   (parameters.CSMC.AS.repM$p[1,r] <- rtruncnorm(1, a=a.p, b=b.p, mean=m.p, sd=sigma.p))
-  # parameters.CSMC$p[1,r] <- 0.2
+
   
-  ### Draw {theta^(b_0:T)_0:T,x^(b_0:T)_0:T} from {THETA_0:T,X_0:T,A_1:T} by running one iteration of SMC
+  ## Draw reference trajectory by running one iteration of SMC
   ptm <- proc.time() 
   SMC.results <- SMC(y, 
                      regimes, 
@@ -121,9 +120,10 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                      pop.size)
   proc.time() - ptm 
   
+  # Get marginal likelihood
   marginalLogLik.CSMC.AS.repM[r] <- sum(SMC.results$logLikY)
   
-  ### Sample the reference trajectory
+  ## Sample the reference trajectory
   # Draw L in {1:N}
   L <- sample(1:N, 1, prob = SMC.results$normalisedWeights[, T+1])
   
@@ -161,16 +161,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   RsampleMat.CSMC.AS.repM[r,] <- replace.zero(RefParticleR) 
   XsampleMat.CSMC.AS.repM[r,] <- RefParticleX 
   
-  
-  # # Draw reference I_t and compare it with y_t
-  # plot(1:length(y), y, col="grey")
-  # lines(RefParticleI*parameters.CSMC.AS.repM$p[1,r], col="red")
-  # 
-  # # Draw reference X_t and compare it with x_t
-  # plot(1:length(x), x, type = "p", col = "grey", pch=20)
-  # lines(1:length(RefParticleX), RefParticleX, type = "l", col = "blue")
-  # 
-  
+
   # Compute acceptance rate
   accept.kappa <- c()
   accept.lambda <- c()
@@ -184,7 +175,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   
 
-  # (2) For iteration at r = 1, ..., R
+  ### (2) For iteration at r = 1, ..., R
   ptm <- proc.time()
   
   pb <- txtProgressBar(min = 0, max = niter+1, style = 3) # Show progress bar
@@ -192,7 +183,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     
     r = r+1
     
-    # i) Run CSMC-AS with replicator M conditional on {theta(b_0:T)_0:T,x(b_0:T)_0:T} to obtain {Θ^1:N_0:T , X^1:N_0:T , A^1:N_1:T }
+    ### i) Run CSMC-AS 
     CSMC.AS.repMresults <- CSMC.AS.repM(y, 
                                         regimes, 
                                         RefParticleS, RefParticleE, RefParticleI, RefParticleR, RefParticleX,
@@ -212,7 +203,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     marginalLogLik.CSMC.AS.repM[r] <- sum(CSMC.AS.repMresults$logLikY)
     
     ### ii) Sample the reference trajectory
-    ### Sample the reference trajectory
     # Draw L in {1:N}
     L <- sample(1:N, 1, prob = CSMC.AS.repMresults$normalisedWeights[, T+1])
     
@@ -252,8 +242,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     
     
     
-    # iii) Draw \psi from p(\psi|\theta_(b_{0:T}), x_(b_{0:T}), b_0:T)
-    # ChangeLocation <- which(RefParticleX==2)
+    ### iii) Draw \psi from p(\psi|\theta, x, y)
     
     # Latency rate: alpha
     mh.alpha.update <- update.alpha(y,  
@@ -272,7 +261,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     parameters.CSMC.AS.repM$alpha[1,r] <- mh.alpha.update$new.alpha
     accept.alpha <- c(accept.alpha, mh.alpha.update$indicator)
     
-    # # Transmission rate: beta
+    # Transmission rate: beta
     mh.beta.update <- update.beta(y,
                                   RefParticleX,
                                   RefParticleS, RefParticleE, RefParticleI, RefParticleR,
@@ -289,10 +278,8 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     parameters.CSMC.AS.repM$beta[1,r] <- mh.beta.update$new.beta
     accept.beta <- c(accept.beta, mh.beta.update$indicator)
     
-    # parameters.CSMC.AS.repM$beta[1,r] <- 0.39
     
-    
-    # # Recovery rate: gamma
+    # Recovery rate: gamma
     mh.gamma.update<- update.gamma(y,
                                    RefParticleX,
                                    RefParticleS, RefParticleE, RefParticleI, RefParticleR,
@@ -309,9 +296,8 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
     parameters.CSMC.AS.repM$gamma[1,r] <- mh.gamma.update$new.gamma
     accept.gamma <- c(accept.gamma, mh.gamma.update$indicator)
     
-    # parameters.CSMC.AS.repM$gamma[1,r] <- 0.2
     
-    # # # Precision parameter: kappa
+    # Precision parameter: kappa
     mh.kappa.update <- update.kappa(y,
                                     RefParticleX,
                                     RefParticleS, RefParticleE, RefParticleI, RefParticleR,
@@ -327,9 +313,9 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                     300)
     parameters.CSMC.AS.repM$kappa[1,r] <- mh.kappa.update$new.kappa
     accept.kappa <- c(accept.kappa, mh.kappa.update$indicator)
-    # parameters.CSMC.AS.repM$kappa[1,r] <- 20000
+
     
-    # # Precision parameter: lambda
+    # Precision parameter: lambda
     mh.lambda.update <- update.lambda(y,
                                       RefParticleX,
                                       RefParticleS, RefParticleE, RefParticleI, RefParticleR,
@@ -345,7 +331,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                       200)
     parameters.CSMC.AS.repM$lambda[1,r] <- mh.lambda.update$new.lambda
     accept.lambda <- c(accept.lambda, mh.lambda.update$indicator)
-    # parameters.CSMC.AS.repM$lambda[1,r] <- 2000
     
     
     # p
@@ -364,7 +349,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                             0.02)
     parameters.CSMC.AS.repM$p[1, r] <- mh.p.update$new.p
     accept.p <- c(accept.p, mh.p.update$indicator)
-    # parameters.CSMC.AS.repM$p[1, r] <- 0.25
+
     
     # pi.k in Px
     mh.pi.k.update <- update.pi.k(y,
@@ -381,7 +366,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                   pop.size,
                                   0.05)
     parameters.CSMC.AS.repM$Px[[r]]<- mh.pi.k.update$newPx
-    # accept.Px[mh.pi.k.update$k,r-1] <-  mh.pi.k.update$indicator
+
     if (mh.pi.k.update$k == 1){
       accept.pi.1 <- c(accept.pi.1, mh.pi.k.update$indicator)
     }else if (mh.pi.k.update$k == 2){

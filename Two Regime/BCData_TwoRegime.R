@@ -13,7 +13,7 @@ getwd()
 
 ################################ Daily active counts ###########################################
 
-bc_data <- read.csv(file = "~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Real Data/BC COVID CASES - Daily Cases.csv",
+bc_data <- read.csv(file = "../Data/Real Data/BC COVID CASES - Daily Cases.csv",
                     header = TRUE,
                     sep = ",",
                     stringsAsFactors = FALSE)
@@ -47,7 +47,6 @@ g <- ggplot(bc_data_active, aes(x = Date, y = ActiveCases)) +
            size = 5, color = "red")
 g
 
-ggsave(file="~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Real Data/BCDailyActiveCases.png", g)
 
 
 ################################ Weekly active counts ###########################################
@@ -61,8 +60,6 @@ bc_data_active[1:200,]
 
 # Extract data
 library(dplyr)
-# start <- which(bc_data_active$Date == "2020-07-20")
-# end <- which(bc_data_active$Date == "2021-08-03")
 new_data_weekly <- as.data.frame(bc_data_active%>%
                                    group_by(Week) %>%
                                    dplyr::summarise(weekly.n = sum(ActiveCases)))
@@ -88,10 +85,6 @@ g.weekly <- ggplot(new_data_weekly, aes(x = Week, y = weekly.n)) +
            size = 5, color = "red")
 g.weekly
 
-ggsave(file="~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Real Data/BCWeeklyActiveCases.png", g.weekly, width = 7, height = 5)
-
-# scale_x_date(limit=c(as.Date("2020-07-20"),as.Date("2021-07-02"))) # extract certain period
-
 ############################ Run PG Sampler ##############################
 
 library(foreach)
@@ -100,9 +93,6 @@ detectCores()
 cl <- makeCluster(6)
 registerDoParallel(cl)
 
-## Daily active cases (before omicron starts)
-# y <- bc_data_active$ActiveCases[1:438]/5070000
-# time <- bc_data_active$Date[1:438]
 
 ## Weekly active cases
 y <- new_data_weekly$weekly.n[1:95]/5070000
@@ -143,7 +133,7 @@ hyperparams <- list(
   b.f = 1) 
 
 # Call PG sampler
-source("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Code/Two Regime/ParticleGibbs_TwoRegime.R")
+source("ParticleGibbs_TwoRegime.R")
 
 ptm <- proc.time()
 PG.results <- PG.CSMC.AS(y, regimes, M, niter, hyperparams, pop.size=1)
@@ -159,15 +149,7 @@ proc.time()-ptm
 
 stopCluster(cl)
 
-
-# Save results to local file
-setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data")
-saveRDS(hyperparams, paste0("PG_results_final_hyperparams_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
-saveRDS(PG.results, paste0("PG_results_final_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
-
-# Read results
-# hyperparams <- readRDS("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_hyperparams_BCWeekly_niter11000_M50_K2.rds")
-PG.results <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_final_niter21000_M50_K2.rds")
+str(PG.results)
 
 # Extract results from each chain 
 MCMC.chain.1 <- PG.results[[1]]
@@ -193,10 +175,8 @@ marginalLogLik.CSMC.AS.repM <- MCMC.chain.2$marginalLogLik.CSMC.AS.repM
 
 
 ############################ Data Visualization #######################################
-setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Real Data")
 
-# Trace plot of parameters
-pdf(paste("(Weekly)TwoRegimeTracePlot.pdf"), width = 10, height = 7)
+### Trace plot of parameters
 par(mfrow=c(3,3))
 plot(parameters.CSMC.AS.repM$alpha[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(alpha), cex=2)
 plot(parameters.CSMC.AS.repM$beta[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(beta), cex=2)
@@ -204,9 +184,7 @@ plot(parameters.CSMC.AS.repM$gamma[1, burnin:niter], type="l", xlab="Iterations"
 plot(parameters.CSMC.AS.repM$kappa[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(kappa), cex=2)
 plot(parameters.CSMC.AS.repM$lambda[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(lambda), cex=2)
 plot(parameters.CSMC.AS.repM$p[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(p))
-# plot(parameters.CSMC.AS.repM$f[1, 1:niter], type="l", xlab="Iterations", ylab = expression(f[1]))
 plot(parameters.CSMC.AS.repM$f[2, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[2]), cex=2)
-# plot(parameters.CSMC.AS.repM$f[3, 1:niter], type="l", xlab="Iterations", ylab = expression(f[3]))
 
 
 # Posterior Px
@@ -219,13 +197,13 @@ for (i in 1:(niter)){
 post.pi.k1
 post.pi.k2
 
-# pi_{k1}
+# pi_{11}
 plot(post.pi.k1[burnin:(niter-1),1], 
      type="l", 
      xlab="Iterations", 
-     ylab = expression(pi[11]), cex=2) # pi_11
+     ylab = expression(pi[11]), cex=2) 
 
-
+# pi_{22}
 plot(post.pi.k2[burnin:(niter-1),2], 
      type="l", 
      xlab="Iterations", 
