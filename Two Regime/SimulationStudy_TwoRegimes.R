@@ -19,7 +19,7 @@ getwd()
 #-------------------------------- Two Regimes ----------------------------------#
 source("Update_SEIR_RK4.R") # Rk4 ODE solver
 
-seed=1580
+seed = 1580
 set.seed(seed)
 
 # # Set up true model parameters  
@@ -206,11 +206,11 @@ regimes <- sim_data$regimes
 lenXset <- length(regimes)
 
 # Number of MCMC chains
-nchain  <- 2    
+nchain  <- 1    
 
 # Number of MCMC iterations
-burnin <- 100
-niter   <- 1000 + burnin      # number of MCMC iterations
+burnin <- 1000
+niter   <- 10000 + burnin      # number of MCMC iterations
 
 # Number of theta_t for each x_t 
 M <- 50                  

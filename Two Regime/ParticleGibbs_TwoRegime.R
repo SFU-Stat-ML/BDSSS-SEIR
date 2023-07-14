@@ -96,8 +96,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   
   # Transmission Rate modifier: f_{x_t}
-  (parameters.CSMC.AS.repM$f[,r] <- c(1, 
-                                      runif(1, min=a.f, max=b.f)))
+  (parameters.CSMC.AS.repM$f[,r] <- c(1, runif(1, min=a.f, max=b.f)))
   
   
   # Detection Rate: p
@@ -398,7 +397,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   
   ## Acceptance rate
-  accept.rate <- data.frame("Parameters"=c("alpha", "beta", "gamma", "lambda", "kappa", "p", "pi.1", "pi.2", "f1", "f2"),
+  accept.rate <- data.frame("Parameters"=c("alpha", "beta", "gamma", "lambda", "kappa", "p", "pi.1", "pi.2",  "f2"),
                             "AcceptanceRate"=c(sum(accept.alpha)/length(accept.alpha), 
                                                sum(accept.beta)/length(accept.beta), 
                                                sum(accept.gamma)/length(accept.gamma), 
@@ -407,7 +406,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                                sum(accept.p)/length(accept.p),
                                                sum(accept.pi.1)/length(accept.pi.1),
                                                sum(accept.pi.2)/length(accept.pi.2),
-                                               sum(accept.f[1,])/length(accept.f[1,]),
                                                sum(accept.f[2,])/length(accept.f[2,])))
 
   

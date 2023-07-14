@@ -1,8 +1,3 @@
-#############################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca
-#############################################################
 
 # Replace zero in the trajectory with the average of neighbors
 

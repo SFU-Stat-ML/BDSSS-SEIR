@@ -23,12 +23,8 @@ getwd()
 
 #-------------------------------- Three Regime ----------------------------------
 source("Update_SEIR_RK4.R") # Rk4 ODE solver
-library("DirichletReg")
 
 seed = 1500
-seed.list <- c(259, 456)
-for (seed in seq(1000, 5000, by=50)){
-
 set.seed(seed)
 
 # # Set up true model parameters  
@@ -46,7 +42,7 @@ regimes <- c(1, 2, 3)
 lenXset <- length(regimes)
 
 # Set up transition probability matrix, row sum=1
-diag.prob <- 0.94  # Assume diagonal elements are same
+diag.prob <- 0.94  
 off.diag.prob <- (1-0.94)/2
 Px <- matrix(c(diag.prob, off.diag.prob, off.diag.prob,
                off.diag.prob, diag.prob, off.diag.prob,
@@ -123,123 +119,49 @@ for (t in 2:(T+1)) {
 
 
 
-# Draw simulated Y_t and I_t
-# pdf(paste0("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/ThreeRegimeSimulatedData_seed", seed, "_T",T+1, ".pdf"), width = 10, height = 7)
-# par(mfrow=c(2,1))
+library("ggplot2")
+library("RColorBrewer")
+display.brewer.all()  # check color pallette
 
-plot(1:length(y), y, type = "b", lty=1, col = "grey", pch=20, ylab = "Proportion Infected", xlab = "Time", main=paste(seed))
-lines(theta[3,]*p, type = "l", col = "indianred")
+##### Draw simulated Y_t and I_t
+par(mfrow=c(1,1))
+plot(as.vector(y), 
+     type = "p", 
+     lty=1, 
+     col = "gray50", 
+     pch = 20, 
+     ylab = "Proportion Infected", 
+     xlab = "Time",
+     cex = 1.5,
+     cex.lab = 1.2)
+lines(theta[3,]*p, type = "l", col = "gray20", lwd=2)
 
-# Observed true regimes
+# Identify different regimes using colored background
 library("R.utils")
 fromto.x1 <- seqToIntervals(which(x==1))
 for (i in 1:nrow(fromto.x1)){
   rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
        col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
 }
+
 fromto.x2 <- seqToIntervals(which(x==2))
 for (i in 1:nrow(fromto.x2)){
-  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1,
-       col = rgb(0.5,0.5,0.5,1/4), border = rgb(0.5,0.5,0.5,1/4))
+  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
+       col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
 }  
+
 fromto.x3 <- seqToIntervals(which(x==3))
 for (i in 1:nrow(fromto.x3)){
   rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
        col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
 }  
-# Add a legend to the plot
-legend("topleft", legend=c(expression(y[t]), expression(pI[t])),
-       col=c("grey", "indianred"),lty=c(1,1))
-
-# dev.off()
-}
-
-
-### Draw the plot of estimated I_t from 10 CSMC iterations
-# par(mfrow=c(1,1))
-plot(1:(T+1), y, type = "p", col = "grey", pch=20, main = "10 iterations of CSMC", ylab="Proportion")
-lines(1:(T+1), theta[3,]*p, type = "l", lty=2, col = "red")
-
-
-# for (j in 1:NumOfCurves){
-
-  # source("CSMC-AS-Rep-M_BDSSSM-SEIR.R") # conditional SMC with replicator M
-
-  # i) Run CSMC-AS with replicator M conditional on {theta(b_0:T)_0:T,x(b_0:T)_0:T} to obtain {Θ^1:N_0:T , X^1:N_0:T , A^1:N_1:T }
-  CSMC.AS.repMresults <- CSMC.AS.repM(y,
-                                      regimes,
-                                      theta[1,], theta[2,], theta[3,], theta[4,], x,
-                                      M,
-                                      Px,
-                                      alpha,
-                                      beta,
-                                      gamma,
-                                      lambda,
-                                      kappa,
-                                      p,
-                                      f[,1],
-                                      pop.size)                               # f_{x_t}
 
 
 
-  ### ii) Sample the reference trajectory
-  ### Sample the reference trajectory
-  # Draw L in {1:N}
-  L <- sample(1:(M*lenXset), 1, prob = CSMC.AS.repMresults$normalisedWeights[, T+1])
 
-  # Create reference trajectory
-  RefParticleS <- rep(0, T+1)
-  RefParticleE <- rep(0, T+1)
-  RefParticleI <- rep(0, T+1)
-  RefParticleR <- rep(0, T+1)
-  RefParticleX <- rep(0, T+1)
-
-  # Recover b_0:T
-  b <- rep(0, T+1)
-  b[T+1] <- L
-
-  RefParticleS[T+1] <- CSMC.AS.repMresults$particlesS[b[T+1],T+1]
-  RefParticleE[T+1] <- CSMC.AS.repMresults$particlesE[b[T+1],T+1]
-  RefParticleI[T+1] <- CSMC.AS.repMresults$particlesI[b[T+1],T+1]
-  RefParticleR[T+1] <- CSMC.AS.repMresults$particlesR[b[T+1],T+1]
-  RefParticleX[T+1] <- CSMC.AS.repMresults$particlesX[b[T+1],T+1]
-
-  for (t in T:1){
-    b[t] <- CSMC.AS.repMresults$AncestorLineage[b[t+1], t]
-
-    RefParticleS[t] <- CSMC.AS.repMresults$particlesS[b[t],t]
-    RefParticleE[t] <- CSMC.AS.repMresults$particlesE[b[t],t]
-    RefParticleI[t] <- CSMC.AS.repMresults$particlesI[b[t],t]
-    RefParticleR[t] <- CSMC.AS.repMresults$particlesR[b[t],t]
-    RefParticleX[t] <- CSMC.AS.repMresults$particlesX[b[t],t]
-
-  }
-
-  lines(1:(T+1), RefParticleI*p, type ="l" , col = "blue")
-
-  # Observed true regimes
-  library("R.utils")
-  fromto.x1 <- seqToIntervals(which(RefParticleX==1))
-  for (i in 1:nrow(fromto.x1)){
-    rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1,
-         col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
-  }
-  fromto.x2 <- seqToIntervals(which(RefParticleX==2))
-  for (i in 1:nrow(fromto.x2)){
-    rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1,
-         col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
-  }
-  fromto.x3 <- seqToIntervals(which(RefParticleX==3))
-  for (i in 1:nrow(fromto.x3)){
-    rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1,
-         col = rgb(0.5,0.5,0.5,1/4), border = rgb(0.5,0.5,0.5,1/4))
-  }
-#  
-
-
-# Draw S_t, E_t, I_t, R_t
-pdf(paste0("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/ThreeRegimeSimulatedSEIR_seed", seed, "_T",T+1, ".pdf"), width = 10, height = 7)
-library(ggplot2)
+##### Draw S_t, E_t, I_t, R_t
+# Set the number of colors and the palette name
+SEIR_colors <- c("#80B1D3", "#B3DE69", "#FB8072", "#BEBADA")  
 
 # Convert theta to a data frame
 theta_df <- data.frame(
@@ -257,9 +179,10 @@ theta_long$variable <- factor(theta_long$variable, levels = var_order)
 
 # Create a plot with four facets
 ggplot(theta_long, aes(x = time, y = value, color = variable)) +
-  geom_line(size = 1) +
+  geom_line(size=0.8) +
   xlab("Time") + ylab("Proportion") +
   facet_wrap(~variable, nrow = 2, scales = "free_y") +
+  scale_color_manual(values = SEIR_colors) +
   theme_bw() +
   theme(
     plot.title = element_text(size = 12, face = "bold"),
@@ -269,10 +192,9 @@ ggplot(theta_long, aes(x = time, y = value, color = variable)) +
     legend.position = "bottom",
     legend.title = element_blank()
   ) +
-  ggtitle("SEIR Model Output") +
-  scale_y_continuous(labels = function(x) sprintf("%.2f", x))
+  ggtitle("Simulated Dynamics of SEIR") +
+  scale_y_continuous(labels = function(x) sprintf("%.2f", x)) 
 
-dev.off()
 
 
 #################### Save simulated data and model parameters ####################
@@ -282,7 +204,7 @@ sim_data <- list(seed = seed, theta = theta, y = y, x = x, regimes = regimes,
                  lambda = lambda, kappa = kappa, p = p, f = f, Px = Px, T = T)
 
 saveRDS(sim_data, 
-        file = paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Three Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
+        file = paste0("../Data/Simulation Data/Three Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
 
 
 
@@ -295,7 +217,7 @@ cl <- makeCluster(6)
 registerDoParallel(cl)
 
 # Read in data
-sim_data <- readRDS(file = paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS"))
+sim_data <- readRDS(file = paste0("../Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS"))
 y <- sim_data$y
 regimes <- sim_data$regimes
 lenXset <- length(regimes)
@@ -329,7 +251,7 @@ hyperparams <- list(
   b.f = c(1, 0.5)) 
 
 # Load the script that contains the PG.CSMC.AS() function
-source("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Code/Three Regime/ParticleGibbs_ThreeRegimes.R")
+source("ParticleGibbs_ThreeRegimes.R")
 
 # Run without parallel processing
 PG.results <- PG.CSMC.AS(y, regimes, M, niter, hyperparams, pop.size=1)

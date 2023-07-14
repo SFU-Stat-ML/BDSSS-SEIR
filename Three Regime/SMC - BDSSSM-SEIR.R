@@ -11,7 +11,7 @@ source("normalize_weights.R") # Weights normalization
 source("Update_SEIR_RK4.R")
 source("InitialFun.R")
 source("ObservationDensity.R")
-# --------------- Algorithm: CSMC-AS with Replicator M ------------------------]
+# ---------------------------- Algorithm: SMC -----------------------------
 # ----- Input: 
 #         y - measurements, length T
 #         regimes - values X could take from {1,...,K}
