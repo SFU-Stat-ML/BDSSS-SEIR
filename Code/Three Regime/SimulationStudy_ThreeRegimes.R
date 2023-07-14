@@ -204,7 +204,7 @@ sim_data <- list(seed = seed, theta = theta, y = y, x = x, regimes = regimes,
                  lambda = lambda, kappa = kappa, p = p, f = f, Px = Px, T = T)
 
 saveRDS(sim_data, 
-        file = paste0("../Data/Simulation Data/Three Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
+        file = paste0("../../Data/Simulation Data/Three Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
 
 
 
@@ -217,12 +217,12 @@ cl <- makeCluster(6)
 registerDoParallel(cl)
 
 # Read in data
-sim_data <- readRDS(file = paste0("../Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS"))
+sim_data <- readRDS(file = paste0("../../Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS"))
 y <- sim_data$y
 regimes <- sim_data$regimes
 lenXset <- length(regimes)
 
-# # Number of MCMC chains
+# Number of MCMC chains
 nchain  <- 2  
 
 # Number of MCMC iterations
@@ -244,17 +244,16 @@ hyperparams <- list(
   b.lambda = 0.01,      
   a.kappa = 200,
   b.kappa = 0.01,
-  a.p = 0.21,
-  b.p = 0.29,
+  a.p = 0.1,
+  b.p = 0.4,
+  m.p = 0.25, 
+  sigma.p = 0.05,
   delta.mat = matrix(c(10, 1, 1, 1, 10, 1, 1, 1, 10), nrow = lenXset, ncol = lenXset),
   a.f = c(0.5, 0),
   b.f = c(1, 0.5)) 
 
 # Load the script that contains the PG.CSMC.AS() function
 source("ParticleGibbs_ThreeRegimes.R")
-
-# Run without parallel processing
-PG.results <- PG.CSMC.AS(y, regimes, M, niter, hyperparams, pop.size=1)
 
 # Run with parallel processing
 ptm <- proc.time()
@@ -267,17 +266,8 @@ proc.time()-ptm
 
 stopCluster(cl)
 
-# # Show contents of PG.results
-# str(PG.results)
-
-# Save results to local file
-setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Three Regime")
-saveRDS(hyperparams, paste0("PG_results_hyperparams_pUnknown_seed", sim_data$seed, "_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
-saveRDS(PG.results, paste0("PG_results_pUnknown_seed", sim_data$seed, "_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
-
-# Read results
-hyperparams <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Three Regime/PG_results_hyperparams_pUnknown_seed1500_niter11000_M100_K3.rds")
-PG.results <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Simulation Study/Three Regime/PG_results_pUnknown_seed1500_niter11000_M100_K3.rds")
+# Show contents of PG.results
+str(PG.results)
 
 # Extract results from each chain 
 MCMC.chain.1 <- PG.results[[1]]
@@ -303,7 +293,7 @@ marginalLogLik.CSMC.AS.repM <- MCMC.chain.2$marginalLogLik.CSMC.AS.repM
 
 
 ############################## Data Visualization ##################################
-sim_data <- readRDS("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS")
+sim_data <- readRDS("../../Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS")
 seed <- sim_data$seed
 alpha <- sim_data$alpha
 beta <- sim_data$beta
@@ -320,14 +310,7 @@ T <- sim_data$T
 regimes <- sim_data$regimes
 lenXset <- length(sim_data$regimes)
 
-# Trace plot of parameters
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/",
-           Sys.Date(), 
-           " SimulationThreeRegimeTracePlot_seed", 
-           seed, 
-           "_T", 
-           T+1, 
-           ".pdf"), width = 15, height = 15)
+### Trace plot of parameters
 par(mfrow=c(5,3))
 plot(parameters.CSMC.AS.repM$alpha[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(alpha), panel.first=abline(h = alpha, col = "red"))
 plot(parameters.CSMC.AS.repM$beta[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(beta), panel.first=abline(h = beta, col = "red"))
@@ -335,7 +318,6 @@ plot(parameters.CSMC.AS.repM$gamma[1, burnin:niter], type="l", xlab="Iterations"
 plot(parameters.CSMC.AS.repM$kappa[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(kappa), panel.first=abline(h = kappa, col = "red"))
 plot(parameters.CSMC.AS.repM$lambda[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(lambda), panel.first=abline(h = lambda, col = "red"))
 plot(parameters.CSMC.AS.repM$p[1, ], type="l", xlab="Iterations", ylab = expression(p), panel.first=abline(h = p, col = "red"))
-# plot(parameters.CSMC.AS.repM$f[1, ], type="l", xlab="Iterations", ylab = expression(f[1]), panel.first=abline(h = f[1,1], col = "red"))
 plot(parameters.CSMC.AS.repM$f[2, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[2]), panel.first=abline(h = f[2,1], col = "red"))
 plot(parameters.CSMC.AS.repM$f[3, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[3]), panel.first=abline(h = f[3,1], col = "red"))
 
@@ -389,18 +371,10 @@ plot(post.pi.k3[burnin:(niter-1),2],
      ylab = expression(pi[32]), 
      panel.first=abline(h = Px[3,2], col = "red"))
 
-dev.off()
 
 
-# Histogram of parameters
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/", 
-           Sys.Date(), 
-           " SimulationThreeRegimeHistogram_seed",
-           seed, 
-           "_T", 
-           T+1, 
-           ".pdf"), width = 15, height = 12)
 
+### Histogram of parameters
 par(mfrow=c(5,3))
 
 # Define colors
@@ -423,7 +397,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = alpha, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$alpha[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$alpha[burnin:niter]), col = blue, lwd = 2)
 alpha.CI <- quantile(parameters.CSMC.AS.repM$alpha[burnin:niter], c(0.025, 0.975))
 abline(v = alpha.CI, col = blue, lty = 2, lwd = 2)
@@ -442,7 +415,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = beta, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$beta[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$beta[burnin:niter]), col = blue, lwd = 2)
 beta.CI <- quantile(parameters.CSMC.AS.repM$beta[burnin:niter], c(0.025, 0.975))
 abline(v = beta.CI, col = blue, lty = 2, lwd = 2)
@@ -460,7 +432,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = gamma, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$gamma[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$gamma[burnin:niter]), col = blue, lwd = 2)
 gamma.CI <- quantile(parameters.CSMC.AS.repM$gamma[burnin:niter], c(0.025, 0.975))
 abline(v = gamma.CI, col = blue, lty = 2, lwd = 2)
@@ -479,7 +450,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = kappa, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$kappa[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$kappa[burnin:niter]), col = blue, lwd = 2)
 kappa.CI <- quantile(parameters.CSMC.AS.repM$kappa[burnin:niter], c(0.025, 0.975))
 abline(v = kappa.CI, col = blue, lty = 2, lwd = 2)
@@ -497,7 +467,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = lambda, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$lambda[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$lambda[burnin:niter]), col = blue, lwd = 2)
 lambda.CI <- quantile(parameters.CSMC.AS.repM$lambda[burnin:niter], c(0.025, 0.975))
 abline(v = lambda.CI, col = blue, lty = 2, lwd = 2)
@@ -515,7 +484,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = p, col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$p[burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$p[burnin:niter]), col = blue, lwd = 2)
 p.CI <- quantile(parameters.CSMC.AS.repM$p[burnin:niter], c(0.025, 0.975))
 abline(v = p.CI, col = blue, lty = 2, lwd = 2)
@@ -533,7 +501,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = f[2,1], col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$f[2,burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$f[2,burnin:niter]), col = blue, lwd = 2)
 f2.CI <- quantile(parameters.CSMC.AS.repM$f[2,burnin:niter], c(0.025, 0.975))
 abline(v = f2.CI, col = blue, lty = 2, lwd = 2)
@@ -552,7 +519,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = f[3,1], col = red, lwd = 2)
-# abline(v = median(parameters.CSMC.AS.repM$f[3,burnin:niter]), col = blue, lwd = 2)
 abline(v = mean(parameters.CSMC.AS.repM$f[3,burnin:niter]), col = blue, lwd = 2)
 f3.CI <- quantile(parameters.CSMC.AS.repM$f[3,burnin:niter], c(0.025, 0.975))
 abline(v = f3.CI, col = blue, lty = 2, lwd = 2)
@@ -570,7 +536,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[1,1], col = red, lwd = 2)
-# abline(v = median(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 pi11.CI <- quantile(post.pi.k1[burnin:(niter-1),1], c(0.025, 0.975))
 abline(v = pi11.CI, col = blue, lty = 2, lwd = 2)
@@ -588,7 +553,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[1,2], col = red, lwd = 2)
-# abline(v = median(post.pi.k1[burnin:(niter-1),2]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k1[burnin:(niter-1),2]), col = blue, lwd = 2)
 pi12.CI <- quantile(post.pi.k1[burnin:(niter-1),2], c(0.025, 0.975))
 abline(v = pi12.CI, col = blue, lty = 2, lwd = 2)
@@ -607,7 +571,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[2,1], col = red, lwd = 2)
-# abline(v = median(post.pi.k2[burnin:(niter-1),1]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k2[burnin:(niter-1),1]), col = blue, lwd = 2)
 pi21.CI <- quantile(post.pi.k2[burnin:(niter-1),1], c(0.025, 0.975))
 abline(v = pi21.CI, col = blue, lty = 2, lwd = 2)
@@ -626,7 +589,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[2,2], col = red, lwd = 2)
-# abline(v = median(post.pi.k2[burnin:(niter-1),2]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k2[burnin:(niter-1),2]), col = blue, lwd = 2)
 pi22.CI <- quantile(post.pi.k2[burnin:(niter-1),2], c(0.025, 0.975))
 abline(v = pi22.CI, col = blue, lty = 2, lwd = 2)
@@ -645,7 +607,6 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[3,1], col = red, lwd = 2)
-# abline(v = median(post.pi.k3[burnin:(niter-1),1]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k3[burnin:(niter-1),1]), col = blue, lwd = 2)
 pi31.CI <- quantile(post.pi.k3[burnin:(niter-1),1], c(0.025, 0.975))
 abline(v = pi31.CI, col = blue, lty = 2, lwd = 2)
@@ -664,299 +625,216 @@ hist(
 axis(1, col = "gray70")
 axis(2, col = "gray70")
 abline(v = Px[3,2], col = red, lwd = 2)
-# abline(v = median(post.pi.k3[burnin:(niter-1),2]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k3[burnin:(niter-1),2]), col = blue, lwd = 2)
 pi32.CI <- quantile(post.pi.k3[burnin:(niter-1),2], c(0.025, 0.975))
 abline(v = pi32.CI, col = blue, lty = 2, lwd = 2)
   
-dev.off()
   
   
   
-## 95% Credible Interval of posterior samples
-S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+### 95% Credible Interval of posterior samples
+S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 S.CredInterval.LL <- S.CredInterval[,1]
 S.CredInterval.UL <- S.CredInterval[,2]
-E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 E.CredInterval.LL <- E.CredInterval[,1]
 E.CredInterval.UL <- E.CredInterval[,2]
-I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 I.CredInterval.LL <- I.CredInterval[,1]
 I.CredInterval.UL <- I.CredInterval[,2]
-R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:(niter-1),], 2, function(x) quantile(x, c(0.025, 0.975))))
+R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 R.CredInterval.LL <- R.CredInterval[,1]
 R.CredInterval.UL <- R.CredInterval[,2]
   
   
-pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/", 
-             Sys.Date(), 
-             " SimulationThreeRegimeEstimatedSEIR_seed", 
-             seed, 
-             "_T", 
-             T+1, 
-             ".pdf"), width = 10, height = 10)
-  
-  par(mfrow=c(2,2))
-  # plot(colMeans(SsampleMat.CSMC.AS.repM),
-  #      xlab="Time",
-  #      type = "l",
-  #      ylab = "S",
-  #      col="grey",
-  #      ylim=c(0,1))
-  # lines(as.vector(theta[1,]), col= "black", lty = 1)
-  # lines(S.CredInterval.LL, col= "grey", lty = 2)
-  # lines(S.CredInterval.UL, col= "grey", lty = 2)
-  # 
-  # plot(colMeans(EsampleMat.CSMC.AS.repM),
-  #      xlab="Time",
-  #      type = "l",
-  #      ylab = "E",
-  #      col="grey",
-  #      ylim=c(0,0.1))
-  # lines(as.vector(theta[2,]), col= "black", lty = 1)
-  # lines(E.CredInterval.LL, col= "grey", lty = 2)
-  # lines(E.CredInterval.UL, col= "grey", lty = 2)
-  # 
-  # plot(colMeans(IsampleMat.CSMC.AS.repM),
-  #      xlab="Time",
-  #      type = "l",
-  #      ylab = "I",
-  #      col="grey",
-  #      ylim=c(0,0.1))
-  # lines(as.vector(theta[3,]), col= "black", lty = 1)
-  # lines(I.CredInterval.LL, col= "grey", lty = 2)
-  # lines(I.CredInterval.UL, col= "grey", lty = 2)
-  # 
-  # plot(colMeans(RsampleMat.CSMC.AS.repM),
-  #      xlab="Time",
-  #      type = "l",
-  #      ylab = "R",
-  #      col="grey",
-  #      ylim=c(0,1))
-  # lines(as.vector(theta[4,]), col= "black", lty = 1)
-  # lines(R.CredInterval.LL, col= "grey", lty = 2)
-  # lines(R.CredInterval.UL, col= "grey", lty = 2)
+par(mfrow=c(2,2))
 
-  ## S plot
-  # Compute the x and y coordinates for the shaded area
-  xx <- 1:length(S.CredInterval.LL)
-  y_lower <- S.CredInterval.LL
-  y_upper <- S.CredInterval.UL
-  
-  # Plot the mean trajectory
-  plot(colMeans(SsampleMat.CSMC.AS.repM[burnin:niter,]),
-       xlab = "Time",
-       type = "l",
-       ylab = "Proportion",
-       col = "#969696",
-       lty = 2,
-       lwd = 2,
-       ylim = c(0, 1),
-       main = "Susceptible (S)",
-       cex.lab = 1.5,
-       cex.axis = 1.5,
-       cex.main = 1.5)
-  
-  # Plot the mean trajectory line
-  lines(as.vector(theta[1,]), col = "black", lwd = 1.5, lty = 1)
-  
-  # Plot the shaded area for the credible interval
-  polygon(c(xx, rev(xx)), c(y_lower, rev(y_upper)), col = rgb(0.5, 0.5, 0.5, alpha = 1/4), border = NA)
-  
-  
-  ## E plot
-  # Compute the x and y coordinates for the shaded area
-  xx <- 1:length(E.CredInterval.LL)
-  y_lower <- E.CredInterval.LL
-  y_upper <- E.CredInterval.UL
-  
-  # Plot the mean trajectory
-  plot(colMeans(EsampleMat.CSMC.AS.repM[burnin:niter,]),
-       xlab = "Time",
-       type = "l",
-       ylab = "Proportion",
-       col = "#969696",
-       lty = 2,
-       lwd = 2,
-       ylim = c(0, 0.1),
-       main = "Exposed (E)",
-       cex.lab = 1.5,
-       cex.axis = 1.5,
-       cex.main = 1.5)
-  
-  # Plot the mean trajectory line
-  lines(as.vector(theta[2,]), col = "black", lwd = 1.5, lty = 1)
-  
-  # Plot the shaded area for the credible interval
-  polygon(c(xx, rev(xx)), 
-          c(y_lower, rev(y_upper)), 
-          col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
-          border = NA)
-  
-  
-  ## I plot
-  # Compute the x and y coordinates for the shaded area
-  xx <- 1:length(I.CredInterval.LL)
-  y_lower <- I.CredInterval.LL
-  y_upper <- I.CredInterval.UL
-  
-  # Plot the mean trajectory
-  plot(colMeans(IsampleMat.CSMC.AS.repM[burnin:niter,]),
-       xlab = "Time",
-       type = "l",
-       ylab = "Proportion",
-       col = "#969696",
-       lty = 2,
-       lwd = 2,
-       ylim = c(0, 0.1),
-       main = "Infected (I)",
-       cex.lab = 1.5,
-       cex.axis = 1.5,
-       cex.main = 1.5)
-  
-  # Plot the mean trajectory line
-  lines(as.vector(theta[3,]), col = "black", lwd = 1.5, lty = 1)
-  
-  # Plot the shaded area for the credible interval
-  polygon(c(xx, rev(xx)), 
-          c(y_lower, rev(y_upper)), 
-          col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
-          border = NA)
-  
-  
-  ## R plot
-  # Compute the x and y coordinates for the shaded area
-  xx <- 1:length(R.CredInterval.LL)
-  y_lower <- R.CredInterval.LL
-  y_upper <- R.CredInterval.UL
-  
-  # Plot the mean trajectory
-  plot(colMeans(RsampleMat.CSMC.AS.repM[burnin:niter,]),
-       xlab = "Time",
-       type = "l",
-       ylab = "Proportion",
-       col = "#969696",
-       lty = 2,
-       lwd = 2,
-       ylim = c(0, 1),
-       main = "Recovered (R)",
-       cex.lab = 1.5,
-       cex.axis = 1.5,
-       cex.main = 1.5)
-  
-  # Plot the mean trajectory line
-  lines(as.vector(theta[4,]), col = "black", lwd = 1.5, lty = 1)
-  
-  # Plot the shaded area for the credible interval
-  polygon(c(xx, rev(xx)), 
-          c(y_lower, rev(y_upper)), 
-          col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
-          border = NA)
-  
-  
-  # Add legend
-  legend("topright",
-         legend = c("True Value", "Posterior Mean"),
-         lty = c(1, 2),
-         lwd = c(1.5, 1.5),
-         col = c("black", "#969696"),
-         bty = "n",
-         cex = 1.2)
-  
-  dev.off()
-  
-  
-  # Posterior I_t
-  par(mfrow=c(1,1))
-  plot(1:length(y), y, type = "p", col = "grey", pch=20, ylab = "Proportion Infected")
-  # lines(1:T, theta[3,]*p, col="red")
-  lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, mean), col="grey")
-  lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  
-  # Observed true regimes +  estimated X_t
-  pdf(paste0("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Simulation Study/Three Regime/", Sys.Date(), " ThreeRegimeEstimatedXt.pdf"), width = 10, height = 7)
-  par(mfrow=c(2,1))
-  
-  plot(1:length(y), y, type = "p", lty=1, col = "gray50", pch=20, 
-       main = "True Regimes", xlab = "Time", ylim=c(0,0.025), cex=1.5, cex.lab = 1.2)
-  lines(theta[3,]*p, type = "l", col = "gray20", lwd=2)
-  
-  library("R.utils")
-  fromto.x1 <- seqToIntervals(which(x==1))
-  for (i in 1:nrow(fromto.x1)){
-    rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
-         col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
-  }
-  
-  fromto.x2 <- seqToIntervals(which(x==2))
-  for (i in 1:nrow(fromto.x2)){
-    rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
-         col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
-  }  
-  
-  fromto.x3 <- seqToIntervals(which(x==3))
-  for (i in 1:nrow(fromto.x3)){
-    rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
-         col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
-  }  
-  
-  # Estimated X_t
-  plot(1:length(y), y, type = "p", lty=1, 
-       col = "gray50", pch=20, main = "", 
-       xlab="Time", ylim=c(0,0.025), cex=1.5)
-  lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p), 2, mean), col="black")
-  lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="black", lty = 2)
-  lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="black", lty = 2)
-  
-  est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
-                           "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin),
-                           "prob.x3" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 3)/(niter-burnin))
-  est.x <- apply(est.prob.x, 1, which.max)
-  
-  library("R.utils")
-  fromto.x1 <- seqToIntervals(which(est.x==1))
-  for (i in 1:nrow(fromto.x1)){
-    rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
-         col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
-  }
-  
-  fromto.x2 <- seqToIntervals(which(est.x==2))
-  for (i in 1:nrow(fromto.x2)){
-    rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
-         col = rgb(0.5,0.5,0.5,1/4), border = rgb(0.5,0.5,0.5,1/4))
-  }  
-  
-  fromto.x3 <- seqToIntervals(which(est.x==3))
-  for (i in 1:nrow(fromto.x3)){
-    rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
-         col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
-  }  
-  
-  # plot(colSums(XsampleMat.CSMC.AS.repM == 1)/niter, 
-  #      type = "l", 
-  #      # xlim = c(20, T),
-  #      ylim = c(0, 1),            # Adjust accordingly!
-  #      xlab = paste("Data of length T =", T),
-  #      ylab = "Probability",
-  #      main = expression('Estimated P(X'[t]*'|y'[1:T]*')'),
-  #      col="grey")
-  # lines(colSums(XsampleMat.CSMC.AS.repM == 2)/niter, col="blue")
-  # lines(colSums(XsampleMat.CSMC.AS.repM == 3)/niter, col="darkblue")
-  
-  # # Add legend
-  # legend("topright",
-  #        legend=c(expression('P(X'[t]*'= 1|y'[1:T]*')'), 
-  #                 expression('P(X'[t]*'= 2|y'[1:T]*')'), 
-  #                 expression('P(X'[t]*'= 3|y'[1:T]*')')),
-  #        col = c("grey", "blue", "darkblue"),
-  #        lty = 1,
-  #        bty = "n", 
-  #        cex = 0.8)
-  dev.off()
-  
-  
-  
-## Marginal Loglikelihood
-mean(marginalLogLik.CSMC.AS.repM)
-plot(1:niter, marginalLogLik.CSMC.AS.repM)
+## S plot
+# Compute the x and y coordinates for the shaded area
+xx <- 1:length(S.CredInterval.LL)
+y_lower <- S.CredInterval.LL
+y_upper <- S.CredInterval.UL
+        
+# Plot the mean trajectory
+plot(colMeans(SsampleMat.CSMC.AS.repM[burnin:niter,]),
+     xlab = "Time",
+     type = "l",
+     ylab = "Proportion",
+     col = "#969696",
+     lty = 2,
+     lwd = 2,
+     ylim = c(0, 1),
+     main = "Susceptible (S)",
+     cex.lab = 1.5,
+     cex.axis = 1.5,
+     cex.main = 1.5)
+
+# Plot the mean trajectory line
+lines(as.vector(theta[1,]), col = "black", lwd = 1.5, lty = 1)
+
+# Plot the shaded area for the credible interval
+polygon(c(xx, rev(xx)), c(y_lower, rev(y_upper)), col = rgb(0.5, 0.5, 0.5, alpha = 1/4), border = NA)
+
+
+## E plot
+# Compute the x and y coordinates for the shaded area
+xx <- 1:length(E.CredInterval.LL)
+y_lower <- E.CredInterval.LL
+y_upper <- E.CredInterval.UL
+
+# Plot the mean trajectory
+plot(colMeans(EsampleMat.CSMC.AS.repM[burnin:niter,]),
+     xlab = "Time",
+     type = "l",
+     ylab = "Proportion",
+     col = "#969696",
+     lty = 2,
+     lwd = 2,
+     ylim = c(0, 0.1),
+     main = "Exposed (E)",
+     cex.lab = 1.5,
+     cex.axis = 1.5,
+     cex.main = 1.5)
+
+# Plot the mean trajectory line
+lines(as.vector(theta[2,]), col = "black", lwd = 1.5, lty = 1)
+
+# Plot the shaded area for the credible interval
+polygon(c(xx, rev(xx)), 
+        c(y_lower, rev(y_upper)), 
+        col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
+        border = NA)
+
+
+## I plot
+# Compute the x and y coordinates for the shaded area
+xx <- 1:length(I.CredInterval.LL)
+y_lower <- I.CredInterval.LL
+y_upper <- I.CredInterval.UL
+
+# Plot the mean trajectory
+plot(colMeans(IsampleMat.CSMC.AS.repM[burnin:niter,]),
+     xlab = "Time",
+     type = "l",
+     ylab = "Proportion",
+     col = "#969696",
+     lty = 2,
+     lwd = 2,
+     ylim = c(0, 0.1),
+     main = "Infected (I)",
+     cex.lab = 1.5,
+     cex.axis = 1.5,
+     cex.main = 1.5)
+
+# Plot the mean trajectory line
+lines(as.vector(theta[3,]), col = "black", lwd = 1.5, lty = 1)
+
+# Plot the shaded area for the credible interval
+polygon(c(xx, rev(xx)), 
+        c(y_lower, rev(y_upper)), 
+        col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
+        border = NA)
+
+
+## R plot
+# Compute the x and y coordinates for the shaded area
+xx <- 1:length(R.CredInterval.LL)
+y_lower <- R.CredInterval.LL
+y_upper <- R.CredInterval.UL
+
+# Plot the mean trajectory
+plot(colMeans(RsampleMat.CSMC.AS.repM[burnin:niter,]),
+     xlab = "Time",
+     type = "l",
+     ylab = "Proportion",
+     col = "#969696",
+     lty = 2,
+     lwd = 2,
+     ylim = c(0, 1),
+     main = "Recovered (R)",
+     cex.lab = 1.5,
+     cex.axis = 1.5,
+     cex.main = 1.5)
+
+# Plot the mean trajectory line
+lines(as.vector(theta[4,]), col = "black", lwd = 1.5, lty = 1)
+
+# Plot the shaded area for the credible interval
+polygon(c(xx, rev(xx)), 
+        c(y_lower, rev(y_upper)), 
+        col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
+        border = NA)
+
+
+# Add legend
+legend("topright",
+       legend = c("True Value", "Posterior Mean"),
+       lty = c(1, 2),
+       lwd = c(1.5, 1.5),
+       col = c("black", "#969696"),
+       bty = "n",
+       cex = 1.2)
+
+
+
+### True regimes versus  Estimated regimes
+par(mfrow=c(2,1))
+
+plot(1:length(y), y, type = "p", lty=1, col = "gray50", pch=20, 
+     main = "True Regimes", xlab = "Time", ylim=c(0,0.025), cex=1.5, cex.lab = 1.2)
+lines(theta[3,]*p, type = "l", col = "gray20", lwd=2)
+
+library("R.utils")
+fromto.x1 <- seqToIntervals(which(x==1))
+for (i in 1:nrow(fromto.x1)){
+  rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
+       col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
+}
+
+fromto.x2 <- seqToIntervals(which(x==2))
+for (i in 1:nrow(fromto.x2)){
+  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
+       col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
+}  
+
+fromto.x3 <- seqToIntervals(which(x==3))
+for (i in 1:nrow(fromto.x3)){
+  rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
+       col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
+}  
+
+# Estimated X_t
+plot(1:length(y), y, type = "p", lty=1, 
+     col = "gray50", pch=20, main = "", 
+     xlab="Time", ylim=c(0,0.025), cex=1.5)
+lines(1:(T+1), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p[burnin:niter]), 2, mean), col="black")
+lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p[burnin:niter]), col="black", lty = 2)
+lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p[burnin:niter]), col="black", lty = 2)
+
+est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
+                         "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin),
+                         "prob.x3" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 3)/(niter-burnin))
+est.x <- apply(est.prob.x, 1, which.max)
+
+library("R.utils")
+fromto.x1 <- seqToIntervals(which(est.x==1))
+for (i in 1:nrow(fromto.x1)){
+  rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
+       col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
+}
+
+fromto.x2 <- seqToIntervals(which(est.x==2))
+for (i in 1:nrow(fromto.x2)){
+  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
+       col = rgb(0.5,0.5,0.5,1/4), border = rgb(0.5,0.5,0.5,1/4))
+}  
+
+fromto.x3 <- seqToIntervals(which(est.x==3))
+for (i in 1:nrow(fromto.x3)){
+  rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
+       col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
+}  
+
+
+### Marginal Loglikelihood
+mean(marginalLogLik.CSMC.AS.repM[burnin:niter])

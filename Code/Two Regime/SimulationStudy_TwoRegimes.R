@@ -188,25 +188,25 @@ sim_data <- list(seed = seed, theta = theta, y = y, x = x, regimes = regimes,
                  lambda = lambda, kappa = kappa, p = p, f = f, Px = Px, T = T)
 
 saveRDS(sim_data, 
-        file = paste0("../Data/Simulation Data/Two Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
+        file = paste0("../../Data/Simulation Data/Two Regime/simulated_data_seed", seed, "_T", T+1,"_K",lenXset, ".RDS"))
 
 
 # -------------------------- II. Run PG-CSMC-AS  ---------------------------------#
 
-library(foreach)
-library(doParallel)
+library("foreach")
+library("doParallel")
 detectCores()
 cl <- makeCluster(6)
 registerDoParallel(cl)
 
 # Read in data
-sim_data <- readRDS(file = "../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
+sim_data <- readRDS(file = "../../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
 y <- sim_data$y
 regimes <- sim_data$regimes
 lenXset <- length(regimes)
 
 # Number of MCMC chains
-nchain  <- 1    
+nchain  <- 2    
 
 # Number of MCMC iterations
 burnin <- 1000
@@ -325,7 +325,7 @@ plot(post.pi.k2[burnin:(niter-1),2],
      ylab = expression(pi[22]),
      panel.first=abline(h = Px[2,2], col = "red"), ylim=c(0,1))
 
-dev.off()
+
 
 
 ### Histogram of parameters

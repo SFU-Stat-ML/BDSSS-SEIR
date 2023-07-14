@@ -84,7 +84,6 @@ SMC <- function(y,
     ind <- sample(1:N, N, replace = TRUE, prob = normalisedWeights[, t-1])
     
     # Propagation step
-    
     for (i in 1:N){
       
       # Draw {x(i)t } from g(x(i)t |x(a(i))0:t−1)

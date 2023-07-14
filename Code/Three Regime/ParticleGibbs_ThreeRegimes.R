@@ -110,9 +110,8 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
 
   # Transmission Rate modifier: f_{x_t}
-  (parameters.CSMC.AS.repM$f[, r] <- c(1,
-                                       runif(1, min = a.f[1], max = b.f[1]),
-                                       runif(1, min = a.f[2], max = b.f[2])))
+  (parameters.CSMC.AS.repM$f[, r] <- c(1, runif(1, min = a.f[1], max = b.f[1]),
+                                          runif(1, min = a.f[2], max = b.f[2])))
   
   # Detection Rate: p
   (parameters.CSMC.AS.repM$p[1, r] <- runif(1, min = a.p, max = b.p))
