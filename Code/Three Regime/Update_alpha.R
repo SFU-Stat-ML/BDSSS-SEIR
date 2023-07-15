@@ -32,7 +32,7 @@ update.alpha <- function(y, x,
                                           f, a.f, b.f,
                                           pop.size)-
                      log(dtruncnorm(new.alpha,  a=0, b=Inf, mean = alpha, sd = step.size)) -
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R, 
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,

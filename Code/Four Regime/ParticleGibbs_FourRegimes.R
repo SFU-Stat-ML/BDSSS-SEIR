@@ -172,7 +172,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   EsampleMat.CSMC.AS.repM[r, ] <- replace.zero(RefParticleE)
   IsampleMat.CSMC.AS.repM[r, ] <- replace.zero(RefParticleI)
   RsampleMat.CSMC.AS.repM[r, ] <- replace.zero(RefParticleR)
-  XsampleMat.CSMC.AS.repM[r, ] <- replace.zero(RefParticleX)
+  XsampleMat.CSMC.AS.repM[r, ] <- RefParticleX
   
   
   
@@ -255,7 +255,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   EsampleMat.CSMC.AS.repM[r,] <- replace.zero(RefParticleE)
   IsampleMat.CSMC.AS.repM[r,] <- replace.zero(RefParticleI)
   RsampleMat.CSMC.AS.repM[r,] <- replace.zero(RefParticleR) 
-  XsampleMat.CSMC.AS.repM[r,] <- replace.zero(RefParticleX) 
+  XsampleMat.CSMC.AS.repM[r,] <- RefParticleX
   
   
   
@@ -270,7 +270,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                   parameters.CSMC.AS.repM$gamma[1, r-1], m.gamma, sigma.gamma,
                                   parameters.CSMC.AS.repM$kappa[1, r-1], a.kappa, b.kappa,
                                   parameters.CSMC.AS.repM$lambda[1, r-1], a.lambda, b.lambda,
-                                  parameters.CSMC.AS.repM$p[1, r-1], a.p, b.p,
+                                  parameters.CSMC.AS.repM$p[1, r-1], a.p, b.p, m.p, sigma.p,
                                   parameters.CSMC.AS.repM$Px[[r-1]], delta.mat,
                                   parameters.CSMC.AS.repM$f[, r-1], a.f, b.f,
                                   pop.size,
@@ -287,7 +287,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                 parameters.CSMC.AS.repM$gamma[1, r -1], m.gamma, sigma.gamma,
                                 parameters.CSMC.AS.repM$kappa[1, r -1], a.kappa, b.kappa,
                                 parameters.CSMC.AS.repM$lambda[1, r -1], a.lambda, b.lambda,
-                                parameters.CSMC.AS.repM$p[1, r-1], a.p, b.p,
+                                parameters.CSMC.AS.repM$p[1, r-1], a.p, b.p, m.p, sigma.p,
                                 parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                                 parameters.CSMC.AS.repM$f[, r-1],a.f, b.f,
                                 pop.size,
@@ -307,7 +307,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                  parameters.CSMC.AS.repM$gamma[1, r -1], m.gamma, sigma.gamma,
                                  parameters.CSMC.AS.repM$kappa[1, r -1], a.kappa, b.kappa,
                                  parameters.CSMC.AS.repM$lambda[1, r -1], a.lambda, b.lambda,
-                                 parameters.CSMC.AS.repM$p[1, r -1], a.p, b.p,
+                                 parameters.CSMC.AS.repM$p[1, r -1], a.p, b.p, m.p, sigma.p,
                                  parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                                  parameters.CSMC.AS.repM$f[, r -1], a.f, b.f,
                                  pop.size,
@@ -325,7 +325,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                   parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                                   parameters.CSMC.AS.repM$kappa[1, r -1], a.kappa, b.kappa,
                                   parameters.CSMC.AS.repM$lambda[1, r-1], a.lambda, b.lambda,
-                                  parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p,
+                                  parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p, m.p, sigma.p,
                                   parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                                   parameters.CSMC.AS.repM$f[, r - 1],a.f, b.f,
                                   pop.size,
@@ -342,7 +342,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                     parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                                     parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                                     parameters.CSMC.AS.repM$lambda[1, r -1], a.lambda, b.lambda,
-                                    parameters.CSMC.AS.repM$p[1, r -1], a.p, b.p,
+                                    parameters.CSMC.AS.repM$p[1, r -1], a.p, b.p, m.p, sigma.p,
                                     parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                                     parameters.CSMC.AS.repM$f[, r -1], a.f, b.f,
                                     pop.size,
@@ -360,7 +360,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                           parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                           parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                           parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-                          parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p,
+                          parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p, m.p, sigma.p,
                           parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                           parameters.CSMC.AS.repM$f[, r - 1], a.f, b.f,
                           pop.size,
@@ -377,7 +377,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                 parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                                 parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                                 parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-                                parameters.CSMC.AS.repM$p[1, r], a.p, b.p,
+                                parameters.CSMC.AS.repM$p[1, r], a.p, b.p, m.p, sigma.p,
                                 parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
                                 parameters.CSMC.AS.repM$f[, r - 1], a.f, b.f,
                                 pop.size,
@@ -404,7 +404,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                            parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                            parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                            parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-                           parameters.CSMC.AS.repM$p[1, r], a.p, b.p,
+                           parameters.CSMC.AS.repM$p[1, r], a.p, b.p, m.p, sigma.p,
                            parameters.CSMC.AS.repM$Px[[r]], delta.mat,
                            parameters.CSMC.AS.repM$f[, r - 1], a.f, b.f,
                            pop.size,
@@ -419,7 +419,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                              parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                              parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                              parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-                             parameters.CSMC.AS.repM$p[1, r], a.p, b.p,
+                             parameters.CSMC.AS.repM$p[1, r], a.p, b.p, m.p, sigma.p,
                              parameters.CSMC.AS.repM$Px[[r]], delta.mat,
                              c(parameters.CSMC.AS.repM$f[1:2, r], parameters.CSMC.AS.repM$f[3:4, r-1]), a.f, b.f,
                              pop.size,
@@ -434,7 +434,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                              parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
                              parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
                              parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-                             parameters.CSMC.AS.repM$p[1, r], a.p, b.p,
+                             parameters.CSMC.AS.repM$p[1, r], a.p, b.p, m.p, sigma.p,
                              parameters.CSMC.AS.repM$Px[[r]], delta.mat,
                              c(parameters.CSMC.AS.repM$f[1:3, r], parameters.CSMC.AS.repM$f[4, r-1]), a.f, b.f,
                              pop.size,

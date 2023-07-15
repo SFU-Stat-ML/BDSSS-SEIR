@@ -105,7 +105,7 @@ regimes <- c(1, 2, 3)
 lenXset <- length(regimes)
 
 ## Number of MCMC chains
-nchain  <- 1    
+nchain  <- 2    
 
 ## Number of MCMC iterations
 burnin <- 1000

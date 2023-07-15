@@ -1,8 +1,3 @@
-################################################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca 
-################################################################################
 
 #------------------------ Clear memory and graphics ---------------------------#
 rm(list=ls())
@@ -18,7 +13,7 @@ getwd()
 
 ################################ Daily active counts ###########################################
 
-bc_data <- read.csv(file = "~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Data/Real Data/BC COVID CASES - Daily Cases.csv",
+bc_data <- read.csv(file = "../../Data/Real Data/BC COVID CASES - Daily Cases.csv",
                     header = TRUE,
                     sep = ",",
                     stringsAsFactors = FALSE)
