@@ -27,7 +27,7 @@ log.full.conditional <- function(y, x,
     sum(DirichletReg::ddirichlet(Px, alpha=delta.mat,log=TRUE)) +
     sum(dunif(f, min=a.f, max=b.f, log=TRUE)) +
     DirichletReg::ddirichlet(matrix(c(S[1], E[1], I[1], R[1]), nrow=1, ncol=4), alpha=c(100,1,1,1),log=TRUE)+
-    log(1/nrow(f))
+    log(1/length(f))
   
   
   # gψ (xt|xt−1) for t=2,...,T
