@@ -205,8 +205,8 @@ saveRDS(sim_data,
 
 # -------------------------- II. Run PG-CSMC-AS  ---------------------------------#
 
-library(foreach)
-library(doParallel)
+library("foreach")
+library("doParallel")
 detectCores()
 cl <- makeCluster(6)
 registerDoParallel(cl)

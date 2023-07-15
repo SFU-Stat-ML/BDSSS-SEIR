@@ -13,7 +13,7 @@ getwd()
 
 ################################ Daily active counts ###########################################
 
-bc_data <- read.csv(file = "../Data/Real Data/BC COVID CASES - Daily Cases.csv",
+bc_data <- read.csv(file = "../../Data/Real Data/BC COVID CASES - Daily Cases.csv",
                     header = TRUE,
                     sep = ",",
                     stringsAsFactors = FALSE)
@@ -389,58 +389,7 @@ dev.off()
   R.CredInterval.LL <- R.CredInterval[,1]
   R.CredInterval.UL <- R.CredInterval[,2]
   
-  pdf(paste("(Weekly)TwoRegimeEstimatedSEIR.pdf"), width = 12, height = 10)
   par(mfrow=c(2,2))
-  
-  # plot(as.Date(time), apply(SsampleMat.CSMC.AS.repM[burnin:niter,], 2, mean),
-  #      xlab = "",
-  #      type = "l",
-  #      ylab = "S",
-  #      col = "grey",
-  #      ylim = c(0,1),
-  #      xaxt = "n",
-  #      lwd = 2)
-  # lines(time, S.CredInterval.LL, col= "darkgrey", lty = 2, lwd = 2)
-  # lines(time, S.CredInterval.UL, col= "darkgrey", lty = 2, lwd = 2)
-  # axis(1, at = time, lwd = 0, labels = format(time, "%b\n%Y"))
-  # 
-  # plot(time, apply(EsampleMat.CSMC.AS.repM[burnin:niter,], 2, mean),
-  #      xlab = "",
-  #      type = "l",
-  #      ylab = "E",
-  #      col = "grey",
-  #      ylim = c(0,0.1),
-  #      xaxt = "n",
-  #      lwd = 2)
-  # lines(time, E.CredInterval.LL, col= "darkgrey", lty = 2, lwd = 2)
-  # lines(time, E.CredInterval.UL, col= "darkgrey", lty = 2, lwd = 2)
-  # axis(1, at = time, lwd = 0, labels = format(time, "%b\n%Y"))
-  # 
-  # plot(time, apply(IsampleMat.CSMC.AS.repM[burnin:niter,], 2, mean),
-  #      xlab = "",
-  #      type = "l",
-  #      ylab = "I",
-  #      col = "grey",
-  #      ylim=c(0,0.1),
-  #      xaxt = "n",
-  #      lwd = 2)
-  # lines(time, I.CredInterval.LL, col= "darkgrey", lty = 2, lwd = 2)
-  # lines(time, I.CredInterval.UL, col= "darkgrey", lty = 2, lwd = 2)
-  # axis(1, at = time, lwd = 0, labels = format(time, "%b\n%Y"))
-  # 
-  # plot(time, apply(RsampleMat.CSMC.AS.repM[burnin:niter,], 2, mean),
-  #      xlab = "",
-  #      type = "l",
-  #      ylab = "R",
-  #      col="grey",
-  #      ylim = c(0,1),
-  #      xaxt = "n",
-  #      lwd = 2)
-  # lines(time, R.CredInterval.LL, col= "darkgrey", lty = 2, lwd = 2)
-  # lines(time, R.CredInterval.UL, col= "darkgrey", lty = 2, lwd = 2)
-  # axis(1, at = time, lwd = 0, labels = format(time, "%b\n%Y"))
-  
-  
   ## S plot
   # Compute the x and y coordinates for the shaded area
   xx <- 1:length(S.CredInterval.LL)
@@ -545,32 +494,16 @@ dev.off()
           col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
           border = NA)
   
-  dev.off()
-  
-  
-  # Posterior I_t
-  pdf(paste("(Weekly)TwoRegimeEstimatedIt.pdf"), width = 10, height = 7)
-  par(mfrow=c(1,1))
-  plot(1:length(y), y, type = "p", col = "grey", pch=20, ylab = "Proportion Infected", xlab = "Time", ylim=c(0,0.05))
-  # lines(1:T, theta[3,]*p, col="red")
-  lines(1:length(y), apply(IsampleMat.CSMC.AS.repM*mean(parameters.CSMC.AS.repM$p), 2, median), col="grey")
-  lines(I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  lines(I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  dev.off()
   
   
   # Estimated X_t
-  pdf(paste("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Figures/Real Data/(Weekly)TwoRegimeEstimatedXt.pdf"), width = 10, height = 5)
   par(mfrow=c(1,1),  mar=c(5, 4, 4, 6) + 0.1) 
   
   plot(as.Date(time), y, type = "b", col = "gray50", pch=20, lty=1,
        xlab="",ylab = "Proportion Infected", main="Estimated Regimes",
        ylim=c(0,0.015), xaxt = "n")
-  lines(as.Date(time), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p), 2, mean), col="gray20")
-  # lines(as.Date(time), I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  # lines(as.Date(time), I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p), col="grey", lty = 2)
-  
-  
+  lines(as.Date(time), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p[burnin:niter]), 2, mean), col="gray20")
+
   # Compute the x and y coordinates for the shaded area
   xx <- as.Date(time)
   y_lower <- I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p)
@@ -605,44 +538,9 @@ dev.off()
   # Add a vertical line to indicate the new intervention time
   abline(v = as.Date("2020-3-27"), lty = 3, lwd=3, col = red, cex=1.5) # Distancing: Recommendation to avoid gatherings of any size issued
   abline(v = as.Date("2020-4-8"), lty = 3, lwd=2, col = red, cex=1.5) # Closures/Openings: Provincial parks closed
-  # abline(v = as.Date("2020-9-8"), lty = 3, lwd=2, col = red, cex=1.5) # Closures/Openings: All nightclubs and stand-alone banquet halls closed: Liquor sales restricted after 10 p.m. at all bars, pubs and restaurants
   abline(v = as.Date("2020-11-19"), lty = 3, lwd=2, col = red) # Distancing: All social gatherings outside household bubbles prohibited
   abline(v = as.Date("2020-12-2"), lty = 3, lwd=2, col = red, cex=1.5) # Closures/Openings: Indoor fitness and team sports prohibited
   abline(v = as.Date("2021-4-5"), lty = 3, lwd=2, col = red, cex=1.5) # Vaccine: B.C. entered Phase 3 of the Immunization Plan. 3rd phase of vaccination announced to target 1) people age 79 to 60; 2) people age 69 to 16 who are clinically extremely vulnerable
-  # abline(v = as.Date("2021-9-24"), lty = 3, lwd=2, col = red) # 80% of B.C. residents now fully vaccinated.
-  
-  # # Add a vertical line to indicate the eased intervention time
-  # abline(v = as.Date("2020-6-24"), lty = 3, lwd=1.5, col = blue) # Phase 3 of BC's reopening starts
-  # abline(v = as.Date("2021-2-16"), lty = 3, lwd=1.5, col = blue) # As hospitalizations slowly decline, Dr. Henry loosens COVID restrictions, allowing indoor organized events as long as participants are masked and show their vaccine passports. That includes theatres, sporting events and movie theatres. Fitness centres and swimming pools are allowed to go back to pre-pandemic levels. Restaurants and night clubs go back to full capacity with mingling and dancing allowed if masked and vaccinated.
-  # abline(v = as.Date("2021-7-1"), lty = 3, lwd=1.5, col = blue) # Most COVID restrictions removed as outdoor gatherings of up to 5,000 people allowed, limits are taken off the number of diners in restaurants but they still cannot socialize between tables, masks no longer mandatory indoors and recreational travel outside the province can resume.
-  # 
-  
-  # legend("topright",
-  #        legend=c("Intervention", "Regime Two"),
-  #        col = c(red, rgb(0.5, 0.55, 0.8, 1/4)),
-  #        lty = c(2,1),
-  #        bty = "n",
-  #        cex = 0.8)
-  
-  # plot(time, colSums(XsampleMat.CSMC.AS.repM == 1)/niter, 
-  #      type = "l", 
-  #      # xlim = c(20, T),
-  #      ylim = c(0, 1),            # Adjust accordingly!
-  #      xlab = paste("Data record of length T =", T+1),
-  #      ylab = "Probability",
-  #      main = expression('PG-CSMC-AS-repM'),
-  #      col="grey")
-  # lines(time, colSums(XsampleMat.CSMC.AS.repM == 2)/niter, col="blue")
-  
-  # # Add legend
-  # legend("topright",
-  #        legend=c(expression('Estimated P(X'[t]*'= 1|y'[1:T]*')'), expression('Estimated P(X'[t]*'= 2|y'[1:T]*')')),
-  #        col = c("grey", "blue"),
-  #        lty = 1,
-  #        bty = "n", 
-  #        cex = 0.8)
-  
-  dev.off()
   
 
   # Acceptance rate
@@ -658,153 +556,4 @@ dev.off()
   # Marginal likelihood
   mean(marginalLogLik.CSMC.AS.repM[burnin:niter])
   sd(marginalLogLik.CSMC.AS.repM[burnin:niter])
-  
-  ## Timeline of COVID-19 in BC (https://valandos.lt/en/timeline-how-covid-changed-our-lives-over-the-past-three-years)
-  # 2020 April 7
-  # No new COVID-19 cases reported in the province in 72 hours.
-  
-  # 2020 April 12
-  # B.C. reports hunting licence sales have nearly doubled.
-  # 
-  # 2020 April 15
-  # B.C. extends state of emergency for another two weeks. There have been 75 COVID-19 related deaths.
-  # 
-  # 2020 April 15
-  # Interior Health region records its first COVID-19 death, a man in his 60s.
-  # 
-  # 2020 April 24
-  # Two hundred pairs of a special $399 Dr. Bonnie Henry shoe designed by John Fluevog sell out as soon as they go on sale. Proceeds go to Food Banks B.C.
-  
-  # 2020 June 1
-  # School children return to school using a hybrid model for learning that combines in-class and remote learning.
-  # 
-  # 2020 June 24
-  # Premier John Horgan announces that Phase 3 of B.C.’s reopening can start, meaning people are encouraged to travel within B.C. Hotels, movie theatres, parks and the film industry gradually re-opening. At that time, B.C. had recorded fewer than 3,000 cases.
-  # 
-  # 2020 July 1
-  # Kelowna's Bernard Avenue is closed to traffic so restaurants can expand their patios onto the street.
-  # 
-  # 2020 July 13
-  # After going five weeks with no more than one new COVID-19 case per day in the Interior Health region, new cases start to climb as the result of parties held in Kelowna around the July 1 holiday. That becomes known as the Kelowna Cluster and leads to at least 130 positive tests with hundreds more people going into self-isolation.
-  # 
-  # 2020 July 27
-  # The Kelowna Cluster leads to Dr. Henry ordering a clampdown on the number of people who can be in rental accommodation and each unit is allowed only five visitors.
-  # 
-  # 2020 July 30
-  # A UBCO students puts a magnetic notice board on his truck explaining why he has Washington licence plates following hostile reactions to out of province visitors.
-  # 
-  # 2020 Aug. 7
-  # A woman has her Alberta licence plates stolen while stopping overnight in Kamloops.
-  
-  # 2020 Aug. 24
-  # B.C. case total passes the 5,000 mark.
-  
-  # 2020 Sept. 8
-  # Nightclubs and banquet halls ordered closed.
-  
-  # 2020 Sept. 25
-  # Outbreak at Calvary Chapel in Kelowna leads to seven cases.
-  
-  # 2020 Oct. 8
-  # B.C. passes 10,000 COVID-19 cases.
-  
-  # 2020 Dec. 7
-  # Lock down on socializing in B.C. extended for another month.
-  # 
-  # 2020 Dec. 8
-  # B.C. announces a one-time, tax-free $1,000 per family B.C. Recovery Benefit.
-  # 
-  # 2020 Dec. 13
-  # The organizer of a Kelowna protest against COVID-19 restrictions is fined $2,300 in Kelowna. More fines to come.
-  # 
-  # 2020 Dec. 14
-  # Two employees at Big White Ski Resort test positive for COVID-19. That cluster grows to 203 by Jan. 19, 2021. Most are people who work and live on the mountain. Big White cancels reservations for out of region visitors.
-  # 
-  # 2020 Dec. 20
-  # B.C.’s socializing restrictions over Christmas are some of the toughest in Canada.
-  
-  # 2021 Jan. 22
-  # It’s announced that, in mid-March, people can start registering to get their first vaccine, based on age.
-  
-  # 2021 March 1
-  # B.C.’s vaccination program is in Phase 2, meaning those over 80 living in the community can get first doses. Phase 3 starts in April for those 75-79 and continues by age increments with those aged 60 to 64 expected to get their first doses in June.
-  # 
-  # 2021 March 11
-  # Outdoor gatherings of up to 10 people now allowed.
-  # 
-  # 2021 March 14
-  # As many as 250 rally outside the Harvest Church in Kelowna protesting restrictions on faith services. The church had already received several $2,300 fines for holding services contrary to public health orders.
-  # 
-  # 2021 March 23
-  # Ban on outdoor faith services lifted.
-  # 
-  # 2021 March 25
-  # Dr. Henry announces that indoor church services can be held from March 28 to May 13, with safety plans in place.
-  # 
-  # 2021 March 29
-  # Indoor church services banned, as are gyms, fitness clubs and indoor dining in restaurants. Students in Grades 4 to 12 have to wear masks as COVID case numbers spike.
-  # 
-  # 2021 April 1
-  # Visitors allowed back into long term care homes.
-  # 
-  # 2021 April 5
-  # Houseboat party in Kelowna shut down as parties abound in the city of the Easter weekend.
-  # 
-  # 2021 April 8
-  # Record high single daily count of new COVID cases in B.C. at 1,293.
-  # 
-  # 2021 April 10
-  # Pharmacies start providing AstraZeneca vaccines.
-  # 
-  # 2021 April 12
-  # Another downtown Kelowna rally, this time in favour of reopening churches, draws 200 protesters and no fines.
-  # 
-  # Those 40 and over now eligible for first vaccine shots.
-  # 
-  # 2021 April 19
-  # Those over the age of 18 can start registering for vaccines.
-  
-  # 2021 June 15
-  # Further easing of COVID restrictions.
-  
-  # 2021 July 1
-  # Most COVID restrictions removed as outdoor gatherings of up to 5,000 people allowed, limits are taken off 
-  # the number of diners in restaurants but they still cannot socialize between tables, masks no longer mandatory 
-  # indoors and recreational travel outside the province can resume.
-  
-  # 2021 July 1
-  # Most COVID restrictions removed as outdoor gatherings of up to 5,000 people allowed, limits are taken off the number of diners in restaurants but they still cannot socialize between tables, masks no longer mandatory indoors and recreational travel outside the province can resume.
-  
-  # 2021 Sept. 24
-  # 80% of B.C. residents now fully vaccinated.
-  # 
-  # 2021 Sept. 28
-  # “Pandemic of the unvaccinated” is the new catchphrase but older, vaccinated people are disproportionately dying in the pandemic.
-  # 
-  # 2021 Oct. 4
-  # All students in schools have to wear masks.
-  # 
-  # 2021 Oct. 5
-  # Provincial government announces all its employees must be fully vaccinated by Nov. 22 as will all visitors to long term care and assisted living homes by Oct. 12. Visitors to acute care hospitals have until Oct. 26 to be vaccinated.
-  
-  # 2021 Oct. 19
-  # Sports events, weddings and concerts return to 100% capacity.
-  
-  # 2021 Nov. 26
-  # Omicron variant sparks travel ban to Canada from a select few countries. 
-  # Omicron makes it to Canada anyways.
-  
-  
-  # 2021 Nov. 30
-  # International flights resume at Kelowna International Airport, long after some smaller Canadian airports got that right back after the global lockdown of air travel in 2020.
-  # 
-  # Stricter lockdown rules relaxed for the Interior Health region, such as indoor venues going to 100% occupancy.
-  # 
-  # 2021 Dec. 7
-  # First five cases of Omicron appear in B.C.
-  # 
-  # 2021 Dec. 20
-  # Rising Omicron case counts trigger new restrictions, including the cancellation of New Year’s Eve celebrations, limiting personal indoor gatherings to 10 people, venues with 1,000 or more seats limited to 50% capacity and everyone attending indoor events must be vaccinated. All sports tournaments and travel associated with them are cancelled.
-  
-  
   
