@@ -1,16 +1,8 @@
-#############################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca
-#############################################################
 
 # Log Likelihood for BDSSSM-SEIR
 source("Update_SEIR_RK4.R")
 library("HiddenMarkov")
 
-
-
-# For three regimes
 log.full.conditional <- function(y, x,             # y_1:T x_0:T
                                  S, E, I, R, 
                                  alpha, m.alpha, sigma.alpha,
@@ -29,12 +21,13 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
     dgamma(kappa, shape = a.kappa, rate = b.kappa, log=TRUE) +
     dgamma(lambda, shape = a.lambda , rate = b.lambda, log=TRUE) +
-    #   dunif(p, min=a.p, max=b.p, log=TRUE) +
+    log(dtruncnorm(p, a=a.p, b=b.p, mean=m.p, sd=sigma.p)) +
     sum(DirichletReg::ddirichlet(Px, alpha=delta.mat,log=TRUE)) +
     dunif(f[2], min=a.f[1], max=b.f[1], log=TRUE) +
     dunif(f[3], min=a.f[2], max=b.f[2], log=TRUE) +
+    dunif(f[4], min=a.f[3], max=b.f[3], log=TRUE)
     DirichletReg::ddirichlet(matrix(c(S[1], E[1], I[1], R[1]), nrow=1, ncol=4), alpha=c(100,1,1,1),log=TRUE)+
-    log(1/nrow(parameters.CSMC.AS.repM$f))
+    log(1/nrow(f))
   
   
   # gψ (xt|xt−1)

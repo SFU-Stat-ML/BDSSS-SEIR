@@ -1,9 +1,3 @@
-#############################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca
-#         Date: January 17, 2022
-#############################################################
 
 # Takes a vector of log weights, and return the vector of normalized exponentiated values.
 

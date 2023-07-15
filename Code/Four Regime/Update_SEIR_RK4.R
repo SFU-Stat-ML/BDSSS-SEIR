@@ -1,9 +1,3 @@
-################################################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca 
-################################################################################
-
 
 ##### Goal: Update the SEIR states at time t
 

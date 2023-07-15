@@ -109,7 +109,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                           runif(1, min = a.f[2], max = b.f[2])))
   
   # Detection Rate: p
-  (parameters.CSMC.AS.repM$p[1, r] <- runif(1, min = a.p, max = b.p))
+  (parameters.CSMC.AS.repM$p[1, r] <- rtruncnorm(1, a=a.p, b=b.p, mean=m.p, sd=sigma.p))
 
   
   # Draw {theta^(b_0:T)_0:T,x^(b_0:T)_0:T} from {THETA_0:T,X_0:T,A_1:T} by running one iteration of SMC

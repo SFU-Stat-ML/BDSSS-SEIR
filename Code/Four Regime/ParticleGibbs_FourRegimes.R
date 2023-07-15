@@ -1,8 +1,3 @@
-################################################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca 
-################################################################################
 
 # Set the working directory to current path 
 library("rstudioapi")
@@ -72,6 +67,8 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   b.kappa <- hyperparams$b.kappa
   a.p <- hyperparams$a.p
   b.p <- hyperparams$b.p
+  m.p <- hyperparams$m.p
+  sigma.p <- hyperparams$sigma.p
   delta.mat <- hyperparams$delta.mat
   a.f <- hyperparams$a.f
   b.f <- hyperparams$b.f
@@ -94,7 +91,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
       rgamma(1, shape = a.lambda, rate = b.lambda))  # mean = a.lambda/b.lambda
   (parameters.CSMC.AS.repM$kappa[1, r] <-
       rgamma(1, shape = a.kappa, rate = b.kappa))
-  # (parameters.CSMC$kappa[1,r] <- 2000)
+
   
   ### Transition probability matrix: Px
   library("gtools")
@@ -115,9 +112,9 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   
   ### Detection Rate: p
-  (parameters.CSMC.AS.repM$p[1, r] <- runif(1, min = a.p, max = b.p))
-  # parameters.CSMC.AS.repM$p[1,r] <- 0.2
+  (parameters.CSMC.AS.repM$p[1, r] <- rtruncnorm(1, a=a.p, b=b.p, mean=m.p, sd=sigma.p))
   
+
   ### Draw {theta^(b_0:T)_0:T,x^(b_0:T)_0:T} from {THETA_0:T,X_0:T,A_1:T} by running one iteration of SMC
   ptm <- proc.time()
   SMC.results <- SMC(
@@ -178,22 +175,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   XsampleMat.CSMC.AS.repM[r, ] <- replace.zero(RefParticleX)
   
   
-  
-  # # Draw reference I_t and compare it with y_t
-  # plot(1:length(y), y, col = "grey")
-  # lines(RefParticleI * parameters.CSMC.AS.repM$p[1, r], col = "red")
-  
-  # # Draw reference X_t and compare it with x_t
-  # plot(1:length(x),
-  #      x,
-  #      type = "p",
-  #      col = "grey",
-  #      pch = 20)
-  # lines(1:length(RefParticleX),
-  #       RefParticleX,
-  #       type = "l",
-  #       col = "blue")
-  # 
   
   # Compute acceptance rate
   accept.kappa <- c()
@@ -279,7 +260,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   
   # iii) Draw \psi from p(\psi|\theta_(b_{0:T}), x_(b_{0:T}), b_0:T)
-  # ChangeLocation <- which(RefParticleX==2)
   
   # Latency rate: alpha
   mh.alpha.update <- update.alpha(y,  
@@ -298,7 +278,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   parameters.CSMC.AS.repM$alpha[1,r] <- mh.alpha.update$new.alpha
   accept.alpha <- c(accept.alpha, mh.alpha.update$indicator)
   
-  # # Transmission rate: beta
+  # Transmission rate: beta
   mh.beta.update <- update.beta(y,
                                 RefParticleX,
                                 RefParticleS, RefParticleE, RefParticleI, RefParticleR,
@@ -315,7 +295,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   parameters.CSMC.AS.repM$beta[1,r] <- mh.beta.update$new.beta
   accept.beta <- c(accept.beta, mh.beta.update$indicator)
   
-  # parameters.CSMC.AS.repM$beta[1,r] <- 0.39
+
   
   
   # # Recovery rate: gamma
@@ -335,8 +315,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   parameters.CSMC.AS.repM$gamma[1,r] <- mh.gamma.update$new.gamma
   accept.gamma <- c(accept.gamma, mh.gamma.update$indicator)
   
-  # parameters.CSMC.AS.repM$gamma[1,r] <- 0.2
-  
+
   # # # Precision parameter: kappa
   mh.kappa.update <- update.kappa(y,
                                   RefParticleX,
@@ -353,8 +332,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                   500)
   parameters.CSMC.AS.repM$kappa[1,r] <- mh.kappa.update$new.kappa
   accept.kappa <- c(accept.kappa, mh.kappa.update$indicator)
-  # parameters.CSMC.AS.repM$kappa[1,r] <- 100000
-  
+
   # # Precision parameter: lambda
   mh.lambda.update <- update.lambda(y,
                                     RefParticleX,
@@ -371,27 +349,25 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                     100)
   parameters.CSMC.AS.repM$lambda[1,r] <- mh.lambda.update$new.lambda
   accept.lambda <- c(accept.lambda, mh.lambda.update$indicator)
-  # parameters.CSMC.AS.repM$lambda[1,r] <- 2000
-  
+
   
   # p
-  # mh.p.update <- update.p(y,
-  #                         RefParticleX,
-  #                         RefParticleS, RefParticleE, RefParticleI, RefParticleR,
-  #                         parameters.CSMC.AS.repM$alpha[1, r], m.alpha, sigma.alpha,
-  #                         parameters.CSMC.AS.repM$beta[1, r], m.beta, sigma.beta,
-  #                         parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
-  #                         parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
-  #                         parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
-  #                         parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p,
-  #                         parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
-  #                         parameters.CSMC.AS.repM$f[, r - 1], a.f, b.f,
-  #                         pop.size,
-  #                         0.03)
-  # parameters.CSMC.AS.repM$p[1, r] <- mh.p.update$new.p
-  # accept.p <- c(accept.p, mh.p.update$indicator)
-  parameters.CSMC.AS.repM$p[1, r] <- 0.25
-  
+  mh.p.update <- update.p(y,
+                          RefParticleX,
+                          RefParticleS, RefParticleE, RefParticleI, RefParticleR,
+                          parameters.CSMC.AS.repM$alpha[1, r], m.alpha, sigma.alpha,
+                          parameters.CSMC.AS.repM$beta[1, r], m.beta, sigma.beta,
+                          parameters.CSMC.AS.repM$gamma[1, r], m.gamma, sigma.gamma,
+                          parameters.CSMC.AS.repM$kappa[1, r], a.kappa, b.kappa,
+                          parameters.CSMC.AS.repM$lambda[1, r], a.lambda, b.lambda,
+                          parameters.CSMC.AS.repM$p[1, r - 1], a.p, b.p,
+                          parameters.CSMC.AS.repM$Px[[r - 1]], delta.mat,
+                          parameters.CSMC.AS.repM$f[, r - 1], a.f, b.f,
+                          pop.size,
+                          0.02)
+  parameters.CSMC.AS.repM$p[1, r] <- mh.p.update$new.p
+  accept.p <- c(accept.p, mh.p.update$indicator)
+
   # pi.k in Px
   mh.pi.k.update <- update.pi.k(y,
                                 RefParticleX,
@@ -475,7 +451,7 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
   
   ## Acceptance rate
   accept.rate <- data.frame("Parameters"=c("alpha", "beta", "gamma", "lambda", "kappa", "p", 
-                                           "pi.1", "pi.2", "pi.3", "pi.4", "f1", "f2", "f3", "f4"),
+                                           "pi.1", "pi.2", "pi.3", "pi.4",  "f2", "f3", "f4"),
                             "AcceptanceRate"=c(sum(accept.alpha)/length(accept.alpha), 
                                                sum(accept.beta)/length(accept.beta), 
                                                sum(accept.gamma)/length(accept.gamma), 
@@ -486,7 +462,6 @@ PG.CSMC.AS <- function(y, regimes, M, niter, hyperparams, pop.size=1){
                                                sum(accept.pi.2)/length(accept.pi.2),
                                                sum(accept.pi.3)/length(accept.pi.3),
                                                sum(accept.pi.4)/length(accept.pi.4),
-                                               sum(accept.f[1,])/length(accept.f[1,]),
                                                sum(accept.f[2,])/length(accept.f[2,]),
                                                sum(accept.f[3,])/length(accept.f[3,]),
                                                sum(accept.f[4,])/length(accept.f[4,])))

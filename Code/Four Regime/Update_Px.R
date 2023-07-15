@@ -1,22 +1,9 @@
-#############################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca
-#############################################################
-
 
 ## Update the transition probability matrix (row vector) in PG-CSMC-AS
 
 library("DirichletReg")
 
 ## Metropolis-hasting step for Px
-# a.k: scale parameter
-# k: index of state
-# Delta.k: Dirichlet prior parameter of pi_k
-# currentPx: transition probability matrix
-# RefParticleX: reference trajectory of x (discrete switching states)
-
-
 
 # For four regimes
 update.pi.k <- function(y, x,             # y_1:T x_0:T
@@ -34,8 +21,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
   
   k <- ceiling(runif(1)*length(f))
   pi.k <- Px[k,]          # \pi_k
-  # new.pi.k <- abs(rnorm(length(pi.k), mean=pi.k, sd=step.size)) # proposal distribution
-  # new.pi.k <- new.pi.k / sum(new.pi.k)  # rescale to ensure the sum is 1
+
   
   if(k==1){
     new.pi.k.11 <- rtruncnorm(1, a=0, b=1, mean=pi.k[1], sd=step.size)
@@ -51,7 +37,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     log.r <- min(c(log(dtruncnorm(pi.k[1], a=0, b=1, mean = new.pi.k.11, sd = step.size)) +
                      log(dtruncnorm(pi.k[2], a=0, b=1-pi.k[1], mean = new.pi.k.12, sd = step.size)) +
                      log(dtruncnorm(pi.k[3], a=0, b=1-pi.k[1]-pi.k[2], mean = new.pi.k.13, sd = step.size)) + 
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,            
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -65,7 +51,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
                      log(dtruncnorm(new.pi.k.11, a=0, b=1, mean = pi.k[1], sd = step.size))-
                      log(dtruncnorm(new.pi.k.12, a=0, b=1-new.pi.k.11, mean = pi.k[2], sd = step.size))-
                      log(dtruncnorm(new.pi.k.13, a=0, b=1-new.pi.k.11-new.pi.k.12, mean = pi.k[3], sd = step.size))-
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -79,9 +65,9 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     
     if(log(runif(1)) < log.r){
       new.pi.k = new.pi.k       # accept move with probabily min(1,r)
-      indicator = 1    # indicator of acceptance
+      indicator = 1             # indicator of acceptance
     } else{
-      new.pi.k = pi.k        # otherwise "reject" move, and stay where we are
+      new.pi.k = pi.k           # otherwise "reject" move, and stay where we are
       indicator = 0
     }
     
@@ -101,7 +87,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     log.r <- min(c(log(dtruncnorm(pi.k[1], a=0, b=1, mean = new.pi.k.21, sd = step.size)) +
                      log(dtruncnorm(pi.k[2], a=0, b=1-pi.k[1], mean = new.pi.k.22, sd = step.size)) +
                      log(dtruncnorm(pi.k[3], a=0, b=1-pi.k[1]-pi.k[2], mean = new.pi.k.23, sd = step.size)) +
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -115,7 +101,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
                      log(dtruncnorm(new.pi.k.21, a=0, b=1, mean = pi.k[1], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.22, a=0, b=1-new.pi.k.21, mean = pi.k[2], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.23, a=0, b=1-new.pi.k.21-new.pi.k.22, mean = pi.k[3], sd = step.size)) -
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,            
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -129,9 +115,9 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     
     if(log(runif(1)) < log.r){
       new.pi.k = new.pi.k       # accept move with probabily min(1,r)
-      indicator = 1    # indicator of acceptance
+      indicator = 1             # indicator of acceptance
     } else{
-      new.pi.k = pi.k        # otherwise "reject" move, and stay where we are
+      new.pi.k = pi.k           # otherwise "reject" move, and stay where we are
       indicator = 0
     }
     
@@ -151,7 +137,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     log.r <- min(c(log(dtruncnorm(pi.k[1], a=0, b=1, mean = new.pi.k.31, sd = step.size)) +
                      log(dtruncnorm(pi.k[2], a=0, b=1-pi.k[1], mean = new.pi.k.32, sd = step.size)) +
                      log(dtruncnorm(pi.k[3], a=0, b=1-pi.k[1]-pi.k[2], mean = new.pi.k.33, sd = step.size)) +
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -165,7 +151,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
                      log(dtruncnorm(new.pi.k.31, a=0, b=1, mean = pi.k[1], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.32, a=0, b=1-new.pi.k.31, mean = pi.k[2], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.33, a=0, b=1-new.pi.k.31-new.pi.k.32, mean = pi.k[3], sd = step.size)) -
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -179,9 +165,9 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     
     if(log(runif(1)) < log.r){
       new.pi.k = new.pi.k       # accept move with probabily min(1,r)
-      indicator = 1    # indicator of acceptance
+      indicator = 1             # indicator of acceptance
     } else{
-      new.pi.k = pi.k        # otherwise "reject" move, and stay where we are
+      new.pi.k = pi.k           # otherwise "reject" move, and stay where we are
       indicator = 0
     }
     
@@ -201,7 +187,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     log.r <- min(c(log(dtruncnorm(pi.k[1], a=0, b=1, mean = new.pi.k.41, sd = step.size)) +
                      log(dtruncnorm(pi.k[2], a=0, b=1-pi.k[1], mean = new.pi.k.42, sd = step.size)) +
                      log(dtruncnorm(pi.k[3], a=0, b=1-pi.k[1]-pi.k[2], mean = new.pi.k.43, sd = step.size)) +
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -215,7 +201,7 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
                      log(dtruncnorm(new.pi.k.41, a=0, b=1, mean = pi.k[1], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.42, a=0, b=1-new.pi.k.41, mean = pi.k[2], sd = step.size)) -
                      log(dtruncnorm(new.pi.k.43, a=0, b=1-new.pi.k.41-new.pi.k.42, mean = pi.k[3], sd = step.size)) -
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R,
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -229,9 +215,9 @@ update.pi.k <- function(y, x,             # y_1:T x_0:T
     
     if(log(runif(1)) < log.r){
       new.pi.k = new.pi.k       # accept move with probabily min(1,r)
-      indicator = 1    # indicator of acceptance
+      indicator = 1             # indicator of acceptance
     } else{
-      new.pi.k = pi.k        # otherwise "reject" move, and stay where we are
+      new.pi.k = pi.k           # otherwise "reject" move, and stay where we are
       indicator = 0
     }
     
