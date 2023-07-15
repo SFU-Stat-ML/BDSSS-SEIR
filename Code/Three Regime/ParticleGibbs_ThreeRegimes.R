@@ -1,8 +1,3 @@
-################################################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca 
-################################################################################
 
 # Set the working directory to current path 
 library("rstudioapi")

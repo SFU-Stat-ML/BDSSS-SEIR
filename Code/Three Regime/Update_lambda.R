@@ -1,6 +1,7 @@
 
 
 ## Update the precision parameter lambda 
+source("log_full_conditional.R")
 
 update.lambda <- function(y, x,             
                           S, E, I, R, 
@@ -15,7 +16,7 @@ update.lambda <- function(y, x,
                           pop.size,
                           step.size){
 
-  (new.lambda  <- rtruncnorm(1, a=0, b=Inf, mean = lambda, sd = step.size))
+  new.lambda  <- rtruncnorm(1, a=0, b=Inf, mean = lambda, sd = step.size)
 
 
   log.r <- min(c(log(dtruncnorm(lambda, a=0, b=Inf, mean = new.lambda, sd = step.size)) +

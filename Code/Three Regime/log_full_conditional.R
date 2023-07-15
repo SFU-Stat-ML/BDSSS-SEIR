@@ -1,14 +1,8 @@
-#############################################################
-# Author: Jingxue (Grace) Feng
-#         Simon Fraser University, Burnaby, BC, Canada
-#         Email: jingxuef@sfu.ca
-#############################################################
+
 
 # Log Likelihood for BDSSSM-SEIR
 source("Update_SEIR_RK4.R")
 library("HiddenMarkov")
-
-
 
 # For three regimes
 log.full.conditional <- function(y, x,             # y_1:T x_0:T
@@ -29,7 +23,6 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
     dgamma(kappa, shape = a.kappa, rate = b.kappa, log=TRUE) +
     dgamma(lambda, shape = a.lambda , rate = b.lambda, log=TRUE) +
-    # dunif(p, min=a.p, max=b.p, log=TRUE) +
     log(dtruncnorm(p, a=a.p, b=b.p, mean=m.p, sd=sigma.p)) +
     sum(DirichletReg::ddirichlet(Px, alpha=delta.mat,log=TRUE)) +
     dunif(f[2], min=a.f[1], max=b.f[1], log=TRUE) +

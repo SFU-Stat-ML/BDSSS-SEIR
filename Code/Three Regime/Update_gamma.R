@@ -2,7 +2,7 @@
 ## Update the recovery parameter gamma in PG-CSMC-AS
 source("log_full_conditional.R")
 
-update.gamma <- function(y, x,             # y_1:T x_0:T
+update.gamma <- function(y, x,             
                          S, E, I, R, 
                          alpha, m.alpha, sigma.alpha,
                          beta, m.beta, sigma.beta,
@@ -18,7 +18,7 @@ update.gamma <- function(y, x,             # y_1:T x_0:T
     new.gamma <- rtruncnorm(1, a=0, b=Inf, mean = gamma, sd = step.size)
 
     log.r <- min(c(log(dtruncnorm(gamma, a=0, b=Inf, mean = new.gamma, sd = step.size)) +
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,             
                                           S, E, I, R, 
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,
@@ -30,7 +30,7 @@ update.gamma <- function(y, x,             # y_1:T x_0:T
                                           f, a.f, b.f,
                                           pop.size)-
                      log(dtruncnorm(new.gamma, a=0, b=Inf, mean = gamma, sd = step.size)) -
-                     log.full.conditional(y, x,             # y_1:T x_0:T
+                     log.full.conditional(y, x,           
                                           S, E, I, R, 
                                           alpha, m.alpha, sigma.alpha,
                                           beta, m.beta, sigma.beta,

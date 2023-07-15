@@ -150,7 +150,7 @@ stopCluster(cl)
 str(PG.results)
 
 # Extract results from each chain 
-MCMC.chain.1 <- PG.results[[1]]
+MCMC.chain.1 <- PG.results
 
 # Chain 1
 SsampleMat.CSMC.AS.repM <- MCMC.chain.1$SsampleMat.CSMC.AS.repM
@@ -298,9 +298,6 @@ plot(colMeans(SsampleMat.CSMC.AS.repM[burnin:niter,]),
      cex.axis = 1.5,
      cex.main = 1.5)
 
-# Plot the mean trajectory line
-lines(as.vector(theta[1,]), col = "black", lwd = 1.5, lty = 1)
-
 # Plot the shaded area for the credible interval
 polygon(c(xx, rev(xx)), c(y_lower, rev(y_upper)), col = rgb(0.5, 0.5, 0.5, alpha = 1/4), border = NA)
 
@@ -325,8 +322,6 @@ plot(colMeans(EsampleMat.CSMC.AS.repM[burnin:niter,]),
      cex.axis = 1.5,
      cex.main = 1.5)
 
-# Plot the mean trajectory line
-lines(as.vector(theta[2,]), col = "black", lwd = 1.5, lty = 1)
 
 # Plot the shaded area for the credible interval
 polygon(c(xx, rev(xx)), 
@@ -349,14 +344,11 @@ plot(colMeans(IsampleMat.CSMC.AS.repM[burnin:niter,]),
      col = "#969696",
      lty = 2,
      lwd = 2,
-     ylim = c(0, 0.1),
+     ylim = c(0, 0.2),
      main = "Infected (I)",
      cex.lab = 1.5,
      cex.axis = 1.5,
      cex.main = 1.5)
-
-# Plot the mean trajectory line
-lines(as.vector(theta[3,]), col = "black", lwd = 1.5, lty = 1)
 
 # Plot the shaded area for the credible interval
 polygon(c(xx, rev(xx)), 
@@ -385,9 +377,6 @@ plot(colMeans(RsampleMat.CSMC.AS.repM[burnin:niter,]),
      cex.axis = 1.5,
      cex.main = 1.5)
 
-# Plot the mean trajectory line
-lines(as.vector(theta[4,]), col = "black", lwd = 1.5, lty = 1)
-
 # Plot the shaded area for the credible interval
 polygon(c(xx, rev(xx)), 
         c(y_lower, rev(y_upper)), 
@@ -397,39 +386,59 @@ polygon(c(xx, rev(xx)),
 
 # Add legend
 legend("topright",
-       legend = c("True Value", "Posterior Mean"),
-       lty = c(1, 2),
-       lwd = c(1.5, 1.5),
-       col = c("black", "#969696"),
+       legend = c("Posterior Mean"),
+       lty = c(2),
+       lwd = c(1.5),
+       col = c("#969696"),
        bty = "n",
        cex = 1.2)
 
 
 
 # Estimated X_t
-par(mfrow=c(2,1))
-plot(time, y, type = "b", col = "grey", pch=20, lty=1,
-     ylab = "Proportion Infected", ylim=c(0,0.05))
-plot(time, colSums(XsampleMat.CSMC.AS.repM == 1)/niter, 
-     type = "l", 
-     # xlim = c(20, T),
-     ylim = c(0, 1),            # Adjust accordingly!
-     xlab = paste("Data record of length T =", T+1),
-     ylab = expression('Estimated P(X'[t]*'= k|y'[1:T]*')'),
-     main = expression('PG-CSMC-AS-repM'),
-     col="grey")
-lines(time, colSums(XsampleMat.CSMC.AS.repM == 2)/niter, col="blue")
-lines(time, colSums(XsampleMat.CSMC.AS.repM == 3)/niter, col="darkblue")
+par(mfrow=c(1,1),  mar=c(5, 4, 4, 6) + 0.1) 
 
-# Add legend
-legend("topright",
-       legend=c("k=1", "k=2", "k=3"),
-       col = c("grey", "blue", "darkblue"),
-       lty = 1,
-       bty = "n", 
-       cex = 0.8)
+plot(as.Date(time), y, type = "b", col = "gray50", pch=20, lty=1,
+     xlab="",ylab = "Proportion Infected", main="Estimated Regimes",
+     ylim=c(0,0.015), xaxt = "n")
+lines(as.Date(time), apply(IsampleMat.CSMC.AS.repM[burnin:niter,]*mean(parameters.CSMC.AS.repM$p[burnin:niter]), 2, mean), col="gray20")
 
+# Compute the x and y coordinates for the shaded area
+xx <- as.Date(time)
+y_lower <- I.CredInterval.LL*mean(parameters.CSMC.AS.repM$p[burnin:niter])
+y_upper <- I.CredInterval.UL*mean(parameters.CSMC.AS.repM$p[burnin:niter])
+
+# Plot the shaded area for the credible interval
+polygon(c(xx, rev(xx)), 
+        c(y_lower, rev(y_upper)), 
+        col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
+        border = NA)
+
+est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
+                         "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin),
+                         "prob.x3" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 3)/(niter-burnin))
+est.x <- apply(est.prob.x, 1, which.max)
+
+library("R.utils")
+fromto.x1 <- seqToIntervals(which(est.x==1))
+for (i in 1:nrow(fromto.x1)){
+  rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
+       col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
+}
+
+fromto.x2 <- seqToIntervals(which(est.x==2))
+for (i in 1:nrow(fromto.x2)){
+  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
+       col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
+}  
+
+fromto.x3 <- seqToIntervals(which(est.x==3))
+for (i in 1:nrow(fromto.x3)){
+  rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
+       col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
+}  
 
 
 ### Marginal Loglikelihood
 mean(marginalLogLik.CSMC.AS.repM[burnin:niter])
+sd(marginalLogLik.CSMC.AS.repM[burnin:niter])
