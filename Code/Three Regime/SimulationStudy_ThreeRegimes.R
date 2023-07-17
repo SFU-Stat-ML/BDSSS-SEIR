@@ -276,6 +276,7 @@ RsampleMat.CSMC.AS.repM <- MCMC.chain.1$RsampleMat.CSMC.AS.repM
 XsampleMat.CSMC.AS.repM <- MCMC.chain.1$XsampleMat.CSMC.AS.repM
 parameters.CSMC.AS.repM <- MCMC.chain.1$parameters.CSMC.AS.repM
 marginalLogLik.CSMC.AS.repM <- MCMC.chain.1$marginalLogLik.CSMC.AS.repM
+MCMC.chain.1$acceptance.rate
 
 # Chain 2
 SsampleMat.CSMC.AS.repM <- MCMC.chain.2$SsampleMat.CSMC.AS.repM
@@ -285,7 +286,7 @@ RsampleMat.CSMC.AS.repM <- MCMC.chain.2$RsampleMat.CSMC.AS.repM
 XsampleMat.CSMC.AS.repM <- MCMC.chain.2$XsampleMat.CSMC.AS.repM
 parameters.CSMC.AS.repM <- MCMC.chain.2$parameters.CSMC.AS.repM
 marginalLogLik.CSMC.AS.repM <- MCMC.chain.2$marginalLogLik.CSMC.AS.repM
-
+MCMC.chain.2$acceptance.rate
 
 ############################## Data Visualization ##################################
 sim_data <- readRDS("../../Data/Simulation Data/Three Regime/simulated_data_seed1500_T175_K3.RDS")
@@ -821,7 +822,7 @@ for (i in 1:nrow(fromto.x1)){
 fromto.x2 <- seqToIntervals(which(est.x==2))
 for (i in 1:nrow(fromto.x2)){
   rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
-       col = rgb(0.5,0.5,0.5,1/4), border = rgb(0.5,0.5,0.5,1/4))
+       col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
 }  
 
 fromto.x3 <- seqToIntervals(which(est.x==3))
