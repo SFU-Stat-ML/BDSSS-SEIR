@@ -151,12 +151,12 @@ proc.time()-ptm
 
 stopCluster(cl)
 
-# 
-# # Save results to local file
-# setwd("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data")
-# saveRDS(hyperparams, paste0("PG_results_hyperparams_BCWeekly_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
-# saveRDS(PG.results, paste0("PG_results_BCWeekly_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
-# 
+
+# Save results to local file
+setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data")
+saveRDS(hyperparams, paste0("PG_results_hyperparams_pUnknown_BCWeekly_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
+saveRDS(PG.results, paste0("PG_results_pUnknown_BCWeekly_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
+
 # # Read results
 # # hyperparams <- readRDS("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_hyperparams_BCWeekly_niter11000_M50_K3.rds")
 # PG.results <- readRDS("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_BCWeekly_niter11000_M50_K3.rds")
@@ -197,7 +197,7 @@ plot(parameters.CSMC.AS.repM$lambda[1, burnin:niter], type="l", xlab="Iterations
 plot(parameters.CSMC.AS.repM$p[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(p))
 plot(parameters.CSMC.AS.repM$f[2, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[2]), cex=2)
 plot(parameters.CSMC.AS.repM$f[3, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[3]))
-plot(parameters.CSMC.AS.repM$f[4, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[3]))
+plot(parameters.CSMC.AS.repM$f[4, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[4]))
 
 
 
@@ -206,70 +206,70 @@ post.pi.k1 <- matrix(0, niter, lenXset, byrow=TRUE)
 post.pi.k2 <- matrix(0, niter, lenXset, byrow=TRUE)
 post.pi.k3 <- matrix(0, niter, lenXset, byrow=TRUE)
 post.pi.k4 <- matrix(0, niter, lenXset, byrow=TRUE)
-for (i in burnin:niter){
+for (i in 1:niter){
   post.pi.k1[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][1,]
   post.pi.k2[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][2,]
   post.pi.k3[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][3,]
   post.pi.k4[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][4,]
 }
-post.pi.k1
-post.pi.k2
-post.pi.k3
-post.pi.k4
+# post.pi.k1
+# post.pi.k2
+# post.pi.k3
+# post.pi.k4
 
 # pi_{k1}
-plot(post.pi.k1[,1], 
+plot(post.pi.k1[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[11]), cex=2) # pi_11
-plot(post.pi.k1[,2], 
+plot(post.pi.k1[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[12]), cex=2) # pi_12
-plot(post.pi.k1[,3],
+plot(post.pi.k1[burnin:niter,3],
      type="l",
      xlab="Iterations",
      ylab = expression(pi[13]), cex=2) # pi_13
 
 
 # pi_{k2}
-plot(post.pi.k2[,1], 
+plot(post.pi.k2[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[21]), cex=2) # pi_21
-plot(post.pi.k2[,2], 
+plot(post.pi.k2[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[22]), cex=2) # pi_22
-plot(post.pi.k2[,3],
+plot(post.pi.k2[burnin:niter,3],
      type="l",
      xlab="Iterations",
      ylab = expression(pi[23]), cex=2) # pi_23
 
 # pi_{k3}
-plot(post.pi.k3[,1], 
+plot(post.pi.k3[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[31]), cex=2) # pi_31
-plot(post.pi.k3[,2], 
+plot(post.pi.k3[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[32]), cex=2) # pi_32
-plot(post.pi.k3[,3],
+plot(post.pi.k3[burnin:niter,3],
      type="l",
      xlab="Iterations",
      ylab = expression(pi[33]), cex=2) # pi_33
 
 # pi_{k4}
-plot(post.pi.k4[,1], 
+plot(post.pi.k4[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[41]), cex=2) # pi_31
-plot(post.pi.k4[,2], 
+plot(post.pi.k4[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[42]), cex=2) # pi_32
-plot(post.pi.k4[,3],
+plot(post.pi.k4[burnin:niter,3],
      type="l",
      xlab="Iterations",
      ylab = expression(pi[43]), cex=2) # pi_33
@@ -293,38 +293,38 @@ hist(parameters.CSMC.AS.repM$f[2,burnin:niter], xlab="",main = expression(f[2]))
 abline(v=mean(parameters.CSMC.AS.repM$f[2, burnin:niter]), col="red", lwd=2)
 hist(parameters.CSMC.AS.repM$f[3,burnin:niter], xlab="",main = expression(f[3]))
 abline(v=mean(parameters.CSMC.AS.repM$f[3, burnin:niter]), col="red", lwd=2)
-hist(post.pi.k1[,1], xlab="",main = expression(pi[11]))
-abline(v=mean(post.pi.k1[,1]), col="red", lwd=2)
-hist(post.pi.k1[,2], xlab="",main = expression(pi[12]))
-abline(v=mean(post.pi.k1[,2]), col="red", lwd=2)
-hist(post.pi.k1[,3], xlab="",main = expression(pi[13]))
-abline(v=mean(post.pi.k1[,3]), col="red", lwd=2)
-hist(post.pi.k2[,1], xlab="",main = expression(pi[21]))
-abline(v=mean(post.pi.k2[,1]), col="red", lwd=2)
-hist(post.pi.k2[,2], xlab="",main = expression(pi[22]))
-abline(v=mean(post.pi.k2[,2]), col="red", lwd=2)
-hist(post.pi.k2[,3], xlab="",main = expression(pi[23]))
-abline(v=mean(post.pi.k2[,3]), col="red", lwd=2)
-hist(post.pi.k3[,1], xlab="",main = expression(pi[31]))
-abline(v=mean(post.pi.k3[,1]), col="red", lwd=2)
-hist(post.pi.k3[,2], xlab="",main = expression(pi[32]))
-abline(v=mean(post.pi.k3[,2]), col="red", lwd=2)
-hist(post.pi.k3[,3], xlab="",main = expression(pi[33]))
-abline(v=mean(post.pi.k3[,3]), col="red", lwd=2)
+hist(post.pi.k1[burnin:niter,1], xlab="",main = expression(pi[11]))
+abline(v=mean(post.pi.k1[burnin:niter,1]), col="red", lwd=2)
+hist(post.pi.k1[burnin:niter,2], xlab="",main = expression(pi[12]))
+abline(v=mean(post.pi.k1[burnin:niter,2]), col="red", lwd=2)
+hist(post.pi.k1[burnin:niter,3], xlab="",main = expression(pi[13]))
+abline(v=mean(post.pi.k1[burnin:niter,3]), col="red", lwd=2)
+hist(post.pi.k2[burnin:niter,1], xlab="",main = expression(pi[21]))
+abline(v=mean(post.pi.k2[burnin:niter,1]), col="red", lwd=2)
+hist(post.pi.k2[burnin:niter,2], xlab="",main = expression(pi[22]))
+abline(v=mean(post.pi.k2[burnin:niter,2]), col="red", lwd=2)
+hist(post.pi.k2[burnin:niter,3], xlab="",main = expression(pi[23]))
+abline(v=mean(post.pi.k2[burnin:niter,3]), col="red", lwd=2)
+hist(post.pi.k3[burnin:niter,1], xlab="",main = expression(pi[31]))
+abline(v=mean(post.pi.k3[burnin:niter,1]), col="red", lwd=2)
+hist(post.pi.k3[burnin:niter,2], xlab="",main = expression(pi[32]))
+abline(v=mean(post.pi.k3[burnin:niter,2]), col="red", lwd=2)
+hist(post.pi.k3[burnin:niter,3], xlab="",main = expression(pi[33]))
+abline(v=mean(post.pi.k3[burnin:niter,3]), col="red", lwd=2)
 
 
 
 ## 95% Credible Interval of posterior samples
-S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:iter,], 2, function(x) quantile(x, c(0.025, 0.975))))
+S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 S.CredInterval.LL <- S.CredInterval[,1]
 S.CredInterval.UL <- S.CredInterval[,2]
-E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:iter,], 2, function(x) quantile(x, c(0.025, 0.975))))
+E.CredInterval <- t(apply(EsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 E.CredInterval.LL <- E.CredInterval[,1]
 E.CredInterval.UL <- E.CredInterval[,2]
-I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:iter,], 2, function(x) quantile(x, c(0.025, 0.975))))
+I.CredInterval <- t(apply(IsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 I.CredInterval.LL <- I.CredInterval[,1]
 I.CredInterval.UL <- I.CredInterval[,2]
-R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:iter,], 2, function(x) quantile(x, c(0.025, 0.975))))
+R.CredInterval <- t(apply(RsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 R.CredInterval.LL <- R.CredInterval[,1]
 R.CredInterval.UL <- R.CredInterval[,2]
 
@@ -476,5 +476,5 @@ legend("topright",
 
 
 ## Marginal likelihood of the model
-mean(marginalLogLik.CSMC.AS.repM[burnin:iter])
-sd(marginalLogLik.CSMC.AS.repM[burnin:iter])
+mean(marginalLogLik.CSMC.AS.repM[burnin:niter])
+sd(marginalLogLik.CSMC.AS.repM[burnin:niter])

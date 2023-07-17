@@ -105,7 +105,7 @@ regimes <- c(1, 2, 3)
 lenXset <- length(regimes)
 
 ## Number of MCMC chains
-nchain  <- 2    
+nchain  <- 1    
 
 ## Number of MCMC iterations
 burnin <- 1000
@@ -147,9 +147,14 @@ proc.time()-ptm
 
 stopCluster(cl)
 
+# Save results to local file
+setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data")
+saveRDS(hyperparams, paste0("PG_results_hyperparams_pUnknown_BCWeekly_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
+saveRDS(PG.results, paste0("PG_results_pUnknown_BCWeekly_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
+
 str(PG.results)
 
-# Extract results from each chain 
+# Extract results chain 1
 MCMC.chain.1 <- PG.results
 
 # Chain 1
@@ -160,22 +165,21 @@ RsampleMat.CSMC.AS.repM <- MCMC.chain.1$RsampleMat.CSMC.AS.repM
 XsampleMat.CSMC.AS.repM <- MCMC.chain.1$XsampleMat.CSMC.AS.repM
 parameters.CSMC.AS.repM <- MCMC.chain.1$parameters.CSMC.AS.repM
 marginalLogLik.CSMC.AS.repM <- MCMC.chain.1$marginalLogLik.CSMC.AS.repM
-
-
+MCMC.chain.1$acceptance.rate
 
 
 ############################## Data Visualization ##################################
 
 # Trace plot of parameters
-par(mfrow=c(5,2))
-plot(parameters.CSMC.AS.repM$alpha[1, 1:niter], type="l", xlab="Iterations", ylab = expression(alpha), cex=2)
-plot(parameters.CSMC.AS.repM$beta[1, 1:niter], type="l", xlab="Iterations", ylab = expression(beta), cex=2)
-plot(parameters.CSMC.AS.repM$gamma[1, 1:niter], type="l", xlab="Iterations", ylab = expression(gamma), cex=2)
-plot(parameters.CSMC.AS.repM$kappa[1, 1:niter], type="l", xlab="Iterations", ylab = expression(kappa), cex=2)
-plot(parameters.CSMC.AS.repM$lambda[1, 1:niter], type="l", xlab="Iterations", ylab = expression(lambda), cex=2)
-plot(parameters.CSMC.AS.repM$p[1, 1:niter], type="l", xlab="Iterations", ylab = expression(p))
-plot(parameters.CSMC.AS.repM$f[2, 1:niter], type="l", xlab="Iterations", ylab = expression(f[2]), cex=2)
-plot(parameters.CSMC.AS.repM$f[3, 1:niter], type="l", xlab="Iterations", ylab = expression(f[3]))
+par(mfrow=c(4,2))
+plot(parameters.CSMC.AS.repM$alpha[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(alpha), cex=2)
+plot(parameters.CSMC.AS.repM$beta[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(beta), cex=2)
+plot(parameters.CSMC.AS.repM$gamma[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(gamma), cex=2)
+plot(parameters.CSMC.AS.repM$kappa[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(kappa), cex=2)
+plot(parameters.CSMC.AS.repM$lambda[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(lambda), cex=2)
+plot(parameters.CSMC.AS.repM$p[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(p))
+plot(parameters.CSMC.AS.repM$f[2, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[2]), cex=2)
+plot(parameters.CSMC.AS.repM$f[3, burnin:niter], type="l", xlab="Iterations", ylab = expression(f[3]))
 
 
 # Posterior Px
@@ -187,17 +191,14 @@ for (i in 1:(niter)){
   post.pi.k2[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][2,]
   post.pi.k3[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][3,]
 }
-post.pi.k1
-post.pi.k2
-post.pi.k3
 
 
 # pi_{k1}
-plot(post.pi.k1[,1], 
+plot(post.pi.k1[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[11]), cex=2) # pi_11
-plot(post.pi.k1[,2], 
+plot(post.pi.k1[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[12]), cex=2) # pi_12
@@ -205,22 +206,22 @@ plot(post.pi.k1[,2],
 
 
 # pi_{k2}
-plot(post.pi.k2[,1], 
+plot(post.pi.k2[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[21]), cex=2) # pi_21
-plot(post.pi.k2[,2], 
+plot(post.pi.k2[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[22]), cex=2) # pi_22
 
 
 # pi_{k3}
-plot(post.pi.k3[,1], 
+plot(post.pi.k3[burnin:niter,1], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[31]), cex=2) # pi_31
-plot(post.pi.k3[,2], 
+plot(post.pi.k3[burnin:niter,2], 
      type="l", 
      xlab="Iterations", 
      ylab = expression(pi[32]), cex=2) # pi_32
@@ -229,7 +230,7 @@ plot(post.pi.k3[,2],
 
 
 # Histogram of parameters
-par(mfrow=c(5,3))
+par(mfrow=c(4,3))
 hist(parameters.CSMC.AS.repM$alpha[burnin:niter], xlab="", main = expression(alpha))
 abline(v=mean(parameters.CSMC.AS.repM$alpha[1:niter]), col="red", lwd=2)
 hist(parameters.CSMC.AS.repM$beta[burnin:niter], xlab="",main = expression(beta))
@@ -241,10 +242,10 @@ abline(v=mean(parameters.CSMC.AS.repM$kappa[burnin:niter]), col="red", lwd=2)
 hist(parameters.CSMC.AS.repM$lambda[burnin:niter], xlab="",main = expression(lambda))
 abline(v=mean(parameters.CSMC.AS.repM$lambda[burnin:niter]), col="red", lwd=2)
 hist(parameters.CSMC.AS.repM$p[burnin:niter], xlab="",main = "p")
-hist(parameters.CSMC.AS.repM$f[2,1:niter], xlab="",main = expression(f[2]))
-abline(v=mean(parameters.CSMC.AS.repM$f[2, 1:niter]), col="red", lwd=2)
+hist(parameters.CSMC.AS.repM$f[2,burnin:niter], xlab="",main = expression(f[2]))
+abline(v=mean(parameters.CSMC.AS.repM$f[2, burnin:niter]), col="red", lwd=2)
 hist(parameters.CSMC.AS.repM$f[3,1:niter], xlab="",main = expression(f[3]))
-abline(v=mean(parameters.CSMC.AS.repM$f[3, 1:niter]), col="red", lwd=2)
+abline(v=mean(parameters.CSMC.AS.repM$f[3, burnin:niter]), col="red", lwd=2)
 hist(post.pi.k1[,1], xlab="",main = expression(pi[11]))
 abline(v=mean(post.pi.k1[,1]), col="red", lwd=2)
 hist(post.pi.k1[,2], xlab="",main = expression(pi[12]))
@@ -395,7 +396,7 @@ legend("topright",
 
 
 
-# Estimated X_t
+### Estimated X_t
 par(mfrow=c(1,1),  mar=c(5, 4, 4, 6) + 0.1) 
 
 plot(as.Date(time), y, type = "b", col = "gray50", pch=20, lty=1,
@@ -414,27 +415,31 @@ polygon(c(xx, rev(xx)),
         col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
         border = NA)
 
+# Add month labels to x-axis
+axis(1, at = time, lwd = 0, labels = format(time, "%b\n%Y"))
+
 est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
                          "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin),
                          "prob.x3" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 3)/(niter-burnin))
 est.x <- apply(est.prob.x, 1, which.max)
 
+# Draw shaded area
 library("R.utils")
 fromto.x1 <- seqToIntervals(which(est.x==1))
 for (i in 1:nrow(fromto.x1)){
-  rect(fromto.x1[i,1], -1, fromto.x1[i,2], 1, 
+  rect(time[fromto.x1[i,1]], -1, time[fromto.x1[i,2]], 1, 
        col = rgb(1,1,1,1/4), border = rgb(1,1,1,1/4))
 }
 
 fromto.x2 <- seqToIntervals(which(est.x==2))
 for (i in 1:nrow(fromto.x2)){
-  rect(fromto.x2[i,1], -1, fromto.x2[i,2], 1, 
+  rect(time[fromto.x2[i,1]], -1, time[fromto.x2[i,2]], 1, 
        col = rgb(0.9,0.6,0.6,1/3), border = rgb(0.9,0.6,0.6,1/3))
 }  
 
 fromto.x3 <- seqToIntervals(which(est.x==3))
 for (i in 1:nrow(fromto.x3)){
-  rect(fromto.x3[i,1], -1, fromto.x3[i,2], 1, 
+  rect(time[fromto.x3[i,1]], -1, time[fromto.x3[i,2]], 1, 
        col = rgb(0.5, 0.55, 0.8, 1/4), border = rgb(0.5, 0.55, 0.8, 1/4))
 }  
 
