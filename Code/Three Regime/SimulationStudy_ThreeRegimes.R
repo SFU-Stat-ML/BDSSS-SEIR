@@ -834,3 +834,4 @@ for (i in 1:nrow(fromto.x3)){
 
 ### Marginal Loglikelihood
 mean(marginalLogLik.CSMC.AS.repM[burnin:niter])
+sd(marginalLogLik.CSMC.AS.repM[burnin:niter])
