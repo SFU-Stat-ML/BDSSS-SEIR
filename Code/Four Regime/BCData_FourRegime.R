@@ -152,15 +152,6 @@ proc.time()-ptm
 stopCluster(cl)
 
 
-# Save results to local file
-setwd("~/Dropbox/(local) Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data")
-saveRDS(hyperparams, paste0("PG_results_hyperparams_pUnknown_BCWeekly_niter", niter,"_M", M, "_K", length(regimes), ".rds"))
-saveRDS(PG.results, paste0("PG_results_pUnknown_BCWeekly_niter", niter, "_M", M, "_K", length(regimes), ".rds"))
-
-# # Read results
-# # hyperparams <- readRDS("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_hyperparams_BCWeekly_niter11000_M50_K3.rds")
-# PG.results <- readRDS("~/Dropbox/Beta-Dirichlet-Time-Series-Model/pMCMC - BDSSSM/Output/Real Data/PG_results_BCWeekly_niter11000_M50_K3.rds")
-
 # Extract results from each chain 
 MCMC.chain.1 <- PG.results[[1]]
 MCMC.chain.2 <- PG.results[[2]]
@@ -453,7 +444,7 @@ legend("topright",
 par(mfrow=c(2,1))
 plot(time, y, type = "b", col = "grey", pch=20, lty=1,
      ylab = "Proportion Infected", ylim=c(0,0.05))
-plot(time, colSums(XsampleMat.CSMC.AS.repM == 1)/niter, 
+plot(time, colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/niter, 
      type = "l", 
      # xlim = c(20, T),
      ylim = c(0, 1),            # Adjust accordingly!
@@ -461,9 +452,9 @@ plot(time, colSums(XsampleMat.CSMC.AS.repM == 1)/niter,
      ylab = expression('Estimated P(X'[t]*'= k|y'[1:T]*')'),
      main = expression('PG-CSMC-AS-repM'),
      col="grey")
-lines(time, colSums(XsampleMat.CSMC.AS.repM == 2)/niter, col="blue")
-lines(time, colSums(XsampleMat.CSMC.AS.repM == 3)/niter, col="darkblue")
-lines(time, colSums(XsampleMat.CSMC.AS.repM == 4)/niter, col="black")
+lines(time, colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin), col="blue")
+lines(time, colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 3)/(niter-burnin), col="darkblue")
+lines(time, colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 4)/(niter-burnin), col="black")
 
 # Add legend
 legend("topright",
