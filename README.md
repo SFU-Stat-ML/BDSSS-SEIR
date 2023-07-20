@@ -19,7 +19,7 @@ We propose a Beta-Dirichlet switching state-space transmission model to track un
 - $f_{x_t}$ is the transmission rate modifier that changes with respect to the state variable $x_t$. 
 - $\psi$ represents the set of model parameters to be estimated.
 - $r(.)$ is the solution of the modified SEIR system starting at $\boldsymbol{\theta}_{t-1}$.
-- 
+  
 ## Features
 This repository contains R code for simulation studies and real data analysis of BDSSS-SEIR model, described as follows:
 - "Code" contains source R code for particle Gibbs samplers in two-regime, three-regime and four-regime settings.
