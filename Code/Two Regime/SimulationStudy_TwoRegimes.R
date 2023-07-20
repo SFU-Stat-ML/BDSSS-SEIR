@@ -236,7 +236,7 @@ hyperparams <- list(
   b.f = 1) 
 
 # Load the script that contains the PG.CSMC.AS() function
-source("ParticleGibbs_TwoRegime.R")
+source("ParticleGibbs_TwoRegimes.R")
 
 # Run PG sampler
 ptm <- proc.time() 

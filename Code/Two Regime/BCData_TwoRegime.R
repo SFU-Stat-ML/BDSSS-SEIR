@@ -133,7 +133,7 @@ hyperparams <- list(
   b.f = 1) 
 
 # Call PG sampler
-source("ParticleGibbs_TwoRegime.R")
+source("ParticleGibbs_TwoRegimes.R")
 
 ptm <- proc.time()
 PG.results <- PG.CSMC.AS(y, regimes, M, niter, hyperparams, pop.size=1)
@@ -346,7 +346,6 @@ hist(
 )
 axis(1, col = "gray70")
 axis(2, col = "gray70")
-# abline(v = median(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 abline(v = mean(post.pi.k1[burnin:(niter-1),1]), col = blue, lwd = 2)
 pi11.CI <- quantile(post.pi.k1[burnin:(niter-1),1], c(0.025, 0.975))
 abline(v = pi11.CI, col = blue, lty = 2, lwd = 2)
@@ -368,7 +367,6 @@ abline(v = mean(post.pi.k2[burnin:(niter-1),2]), col = blue, lwd = 2)
 pi22.CI <- quantile(post.pi.k2[burnin:(niter-1),2], c(0.025, 0.975))
 abline(v = pi22.CI, col = blue, lty = 2, lwd = 2)
   
-dev.off()
   
   
 
