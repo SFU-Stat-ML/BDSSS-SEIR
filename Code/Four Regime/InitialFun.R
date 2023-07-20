@@ -4,8 +4,6 @@
 
 # Note: All initial values must be > 0
 
-# Dirichlet hyperparameter
-
 initial.theta <- function(N){
   
   xi <- c(100, 1, 1, 1) 
