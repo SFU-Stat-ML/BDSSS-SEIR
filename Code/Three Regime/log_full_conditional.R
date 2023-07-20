@@ -2,6 +2,7 @@
 
 # Log Likelihood for BDSSSM-SEIR
 source("Update_SEIR_RK4.R")
+source("TransitionDensity.R")
 library("HiddenMarkov")
 
 # For three regimes
@@ -17,7 +18,7 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
                                  f, a.f, b.f, 
                                  pop.size){
   
-  # mu(theta_1|x_1)mu(x1)π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)
+  # π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)mu(theta_1|x_1)mu(x1)
   log.targ  <- log(dtruncnorm(alpha, a=0, b=Inf, mean = m.alpha, sd = sigma.alpha)) +
     log(dtruncnorm(beta, a=0, b=Inf, mean = m.beta, sd = sigma.beta)) + 
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
@@ -50,10 +51,9 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
                                    f[x[t]], pop.size)
     
     log.targ <- log.targ + dbeta(y[t], lambda*p*I[t], lambda*(1-p*I[t]), log=TRUE) +
-      DirichletReg::ddirichlet(matrix(c(S[t], E[t], I[t], R[t]), nrow = 1),
-                               alpha = kappa*c(runge.kutta$S.new, runge.kutta$E.new,
-                                               runge.kutta$I.new, runge.kutta$R.new),
-                               log = TRUE) 
+      log.trans.density(S[t], E[t], I[t], R[t], kappa,
+                        runge.kutta$S.new, runge.kutta$E.new,
+                        runge.kutta$I.new, runge.kutta$R.new)
     
   }
   
