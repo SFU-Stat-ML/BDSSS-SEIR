@@ -1,6 +1,7 @@
 
 # Log Likelihood for BDSSSM-SEIR
 source("Update_SEIR_RK4.R")
+source("TransitionDensity.R")
 source("ObservationDensity.R")
 library("HiddenMarkov")
 
@@ -17,7 +18,7 @@ log.full.conditional <- function(y, x,
                        f, a.f, b.f, 
                        pop.size){
 
-  # mu(theta_1|x_1)mu(x1)π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)
+  # π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)mu(theta_1|x_1)mu(x1)
   log.targ  <- log(dtruncnorm(alpha, a=0, b=Inf, mean = m.alpha, sd = sigma.alpha)) +
     log(dtruncnorm(beta, a=0, b=Inf, mean = m.beta, sd = sigma.beta)) + 
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
@@ -25,7 +26,7 @@ log.full.conditional <- function(y, x,
     dgamma(lambda, shape = a.lambda , rate = b.lambda, log=TRUE) +
     log(dtruncnorm(p, a=a.p, b=b.p, mean = m.p, sd = sigma.p)) + 
     sum(DirichletReg::ddirichlet(Px, alpha=delta.mat,log=TRUE)) +
-    sum(dunif(f, min=a.f, max=b.f, log=TRUE)) +
+    sum(dunif(f[2], min=a.f[1], max=b.f[1], log=TRUE)) +
     DirichletReg::ddirichlet(matrix(c(S[1], E[1], I[1], R[1]), nrow=1, ncol=4), alpha=c(100,1,1,1),log=TRUE)+
     log(1/length(f))
   
@@ -42,18 +43,17 @@ log.full.conditional <- function(y, x,
   
   # hψ(yt|θt, xt) from t=1,...T; gψ(θt|θt−1, xt) from t=2,...,T
   log.targ <- log.targ + log.obs.density(y[1], I[1], lambda, p)
-  runge.kutta <- matrix(NA, nrow=4, ncol=T-1)
-  log.dirichlet.density <- matrix(NA, nrow=1, ncol=T-1)
   for (t in 2:T){
-    
-    runge.kutta[,t-1] <- unlist(update.SEIR.rk4(S[t-1], E[t-1], I[t-1], R[t-1],
+    runge.kutta <- update.SEIR.rk4(S[t-1], E[t-1], I[t-1], R[t-1],
                                    alpha, beta, gamma,
-                                   f[x[t]], pop.size))
-    log.dirichlet.density[1,t-1] <- DirichletReg::ddirichlet(matrix(c(S[t], E[t], I[t], R[t]), nrow = 1),
-                                                  alpha = kappa*runge.kutta[,t-1],
-                                                  log = TRUE) 
-    log.targ <- log.targ + log.obs.density(y[t], I[t], lambda, p) + log.dirichlet.density[1,t-1]
-  }
+                                   f[x[t]], pop.size)
+    
+    log.targ <- log.targ + log.obs.density(y[t], I[t], lambda, p) +
+      log.trans.density(S[t], E[t], I[t], R[t], 
+                        kappa, 
+                        runge.kutta$S.new, runge.kutta$E.new,
+                        runge.kutta$I.new, runge.kutta$R.new)
+     }
   
   return(log.targ)
   

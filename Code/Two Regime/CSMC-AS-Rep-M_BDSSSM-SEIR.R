@@ -13,6 +13,7 @@ source("Update_SEIR_RK4.R")
 source("InitialFun.R")
 source("ReplaceZeroInTrajectory.R") 
 source("ObservationDensity.R")
+source("TransitionDensity.R")
 
 # --------------- Algorithm: CSMC-AS with Replicator M ------------------------]
 # ----- Input: 
@@ -161,10 +162,11 @@ CSMC.AS.repM <- function(y,
                                      alpha, beta, gamma,
                                      f[X_ref[t]],
                                      pop.size)
-      log.gtheta[i,1] <- DirichletReg::ddirichlet(matrix(c(particlesS[i,t], particlesI[i,t],
-                                                           particlesE[i,t], particlesR[i,t]), nrow=1),
-                                                  kappa * c(runge.kutta$S.new, runge.kutta$E.new,
-                                                            runge.kutta$I.new, runge.kutta$R.new), log = TRUE)
+      log.gtheta[i,1] <- log.trans.density(particlesS[i,t], particlesI[i,t],
+                                           particlesE[i,t], particlesR[i,t],
+                                           kappa, 
+                                           runge.kutta$S.new, runge.kutta$E.new,
+                                           runge.kutta$I.new, runge.kutta$R.new)
     }
     
     ## gψ(x(bt)t|x(bt−1)t−1)

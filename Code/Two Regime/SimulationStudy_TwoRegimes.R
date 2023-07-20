@@ -22,7 +22,7 @@ source("Update_SEIR_RK4.R") # Rk4 ODE solver
 seed = 1580
 set.seed(seed)
 
-# # Set up true model parameters  
+## Set up true model parameters  
 pop.size = 1
 alpha = 1/3               # the incubation rate, the average incubation period is 1/alpha (Use week as unit)
 beta = 0.39                # The transmission rate
@@ -274,7 +274,7 @@ marginalLogLik.CSMC.AS.repM <- MCMC.chain.2$marginalLogLik.CSMC.AS.repM
 
 
 ############################ Data Visualization #######################################
-sim_data <- readRDS("../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
+sim_data <- readRDS("../../Data/Simulation Data/Two Regime/simulated_data_seed1580_T150_K2.RDS")
 seed <- sim_data$seed
 alpha <- sim_data$alpha
 beta <- sim_data$beta
@@ -291,7 +291,7 @@ T <- sim_data$T
 regimes <- sim_data$regimes
 lenXset <- length(sim_data$regimes)
 
-### Trace plot of parameters
+###### Trace plot of parameters
 par(mfrow=c(4,2))
 plot(parameters.CSMC.AS.repM$alpha[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(alpha), panel.first=abline(h = alpha, col = "red"))
 plot(parameters.CSMC.AS.repM$beta[1, burnin:niter], type="l", xlab="Iterations", ylab = expression(beta), panel.first=abline(h = beta, col = "red"))
@@ -307,8 +307,6 @@ for (i in 2:(niter)){
   post.pi.k1[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][1,]
   post.pi.k2[i-1,] <- parameters.CSMC.AS.repM$Px[[i]][2,]
 }
-post.pi.k1
-post.pi.k2
 
 # pi_{k1}
 plot(post.pi.k1[burnin:(niter-1),1],
@@ -328,7 +326,7 @@ plot(post.pi.k2[burnin:(niter-1),2],
 
 
 
-### Histogram of parameters
+###### Histogram of parameters
 par(mfrow=c(3,3))
 
 # Define colors
@@ -488,7 +486,7 @@ abline(v = pi22.CI, col = blue, lty = 2, lwd = 2)
 
 
 
-### 95% Credible Interval of posterior samples for SEIR
+###### 95% Credible Interval of posterior samples for SEIR
 S.CredInterval <- t(apply(SsampleMat.CSMC.AS.repM[burnin:niter,], 2, function(x) quantile(x, c(0.025, 0.975))))
 S.CredInterval.LL <- S.CredInterval[,1]
 S.CredInterval.UL <- S.CredInterval[,2]
@@ -634,7 +632,7 @@ legend("topright",
 
 
 
-### True regimes versus Estimated regimes
+###### True regimes versus Estimated regimes
 par(mfrow = c(2, 1))
 
 ## Plot True Regimes
@@ -674,7 +672,7 @@ polygon(c(xx, rev(xx)),
         col = rgb(0.5, 0.5, 0.5, alpha = 1/4), 
         border = NA)
 
-# Plot regimes
+# Plot regimes in background
 est.prob.x <- data.frame("prob.x1" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 1)/(niter-burnin),
                          "prob.x2" = colSums(XsampleMat.CSMC.AS.repM[burnin:niter,] == 2)/(niter-burnin))
 est.x <- apply(est.prob.x, 1, which.max)
@@ -693,6 +691,6 @@ for (i in 1:nrow(fromto.x2)){
 }  
                  
 
-## Marginal likelihood
+###### Marginal likelihood
 mean(marginalLogLik.CSMC.AS.repM)
-
+sd(marginalLogLik.CSMC.AS.repM)

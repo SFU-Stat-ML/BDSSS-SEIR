@@ -11,6 +11,8 @@ source("normalize_weights.R") # Weights normalization
 source("Update_SEIR_RK4.R")
 source("InitialFun.R")
 source("ObservationDensity.R")
+source("TransitionDensity.R")
+
 # ---------------------------- Algorithm: SMC -----------------------------
 # ----- Input: 
 #         y - measurements, length T

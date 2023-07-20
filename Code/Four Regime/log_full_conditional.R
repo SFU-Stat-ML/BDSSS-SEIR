@@ -15,7 +15,7 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
                                  f, a.f, b.f, 
                                  pop.size){
   
-  # π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)
+  # π(α)π(β)π(γ)π(p)π(λ)π(κ)π(PX )π(f)mu(theta_1|x_1)mu(x1)
   log.targ  <- log(dtruncnorm(alpha, a=0, b=Inf, mean = m.alpha, sd = sigma.alpha)) +
     log(dtruncnorm(beta, a=0, b=Inf, mean = m.beta, sd = sigma.beta)) + 
     log(dtruncnorm(gamma, a=0, b=Inf, mean = m.gamma, sd = sigma.gamma)) + 
@@ -30,7 +30,7 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
     log(1/length(f))
   
   
-  # gψ (xt|xt−1)
+  # gψ (xt|xt−1) for t=2,...,T
   T <- length(y)
   df <- data.frame("t0" = x[1:T-1],
                    "t1" = x[2:T],
@@ -40,10 +40,8 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
   }
   log.targ <- log.targ + sum(log(df$trans.prob))
   
-  # fψ (yt|θ0:t, x1:t)gψ (θt|θ0:t−1, x1:t)gψ (xt|xt−1)from t=1,...T1
-  # t=1
+  # hψ(yt|θt, xt) from t=1,...T; gψ(θt|θt−1, xt) from t=2,...,T
   log.targ <- log.targ + dbeta(y[1], lambda*p*I[1], lambda*(1-p*I[1]), log=TRUE)
-  
   for (t in 2:T){
     
     runge.kutta <- update.SEIR.rk4(S[t-1], E[t-1], I[t-1], R[t-1],
