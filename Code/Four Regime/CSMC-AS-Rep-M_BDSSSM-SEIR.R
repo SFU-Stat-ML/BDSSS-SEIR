@@ -13,6 +13,7 @@ source("Update_SEIR_RK4.R")
 source("InitialFun.R")
 source("ReplaceZeroInTrajectory.R") 
 source("ObservationDensity.R")
+source("TransitionDensity.R")
 
 # --------------- Algorithm: CSMC-AS with Replicator M ------------------------]
 # ----- Input: 
@@ -149,25 +150,12 @@ CSMC.AS.repM <- function(y,
     
     # Ancestor sampling step: Draw b_{t-1} 
 
-    ## f(y_t|theta_t^{(b_t)}, x_t^{(b_t)})
-    # log.fy <- dbeta(y[t], shape1 = lambda*p*particlesI[,t], shape2 = lambda*(1-p*particlesI[,t]), log = TRUE)      
-    log.fy <- dbeta(y[t], shape1 = lambda*p*I_ref[t], shape2 = lambda*(1-p*I_ref[t]), log = TRUE)      
+    ## fψ(y_t|theta_t^{(b_t)}, x_t^{(b_t)})
+    log.fy <- log.obs.density(y[t], I_ref[t], lambda, p)
     
     ## gψ(θt|θ(bt−1)t−1,x(bt)t)
     log.gtheta <- matrix(NA, nrow=N, ncol=1)
     for (i in 1:N){
-      
-      # runge.kutta <- update.SEIR.rk4(particlesS[i,t-1],
-      #                                particlesE[i,t-1],
-      #                                particlesI[i,t-1],
-      #                                particlesR[i,t-1],
-      #                                alpha, beta, gamma,
-      #                                f[particlesX[i,t]],
-      #                                pop.size)
-      # 
-      # log.gtheta[i,1] <- DirichletReg::ddirichlet(matrix(c(S_ref[t], E_ref[t], I_ref[t], R_ref[t]), nrow=1),
-      #                                      kappa * c(runge.kutta$S.new, runge.kutta$E.new,
-      #                                                runge.kutta$I.new, runge.kutta$R.new), log = TRUE)
 
       runge.kutta <- update.SEIR.rk4(S_ref[t-1],
                                      E_ref[t-1],
@@ -176,30 +164,28 @@ CSMC.AS.repM <- function(y,
                                      alpha, beta, gamma,
                                      f[X_ref[t]],
                                      pop.size)
-
-      log.gtheta[i,1] <- DirichletReg::ddirichlet(matrix(c(particlesS[i,t], particlesI[i,t],
-                                                           particlesE[i,t], particlesR[i,t]), nrow=1),
-                                                  kappa * c(runge.kutta$S.new, runge.kutta$E.new,
-                                                            runge.kutta$I.new, runge.kutta$R.new), log = TRUE)
+      log.gtheta[i,1] <- log.trans.density(particlesS[i,t], particlesI[i,t],
+                                        particlesE[i,t], particlesR[i,t],
+                                        kappa,
+                                        runge.kutta$S.new, runge.kutta$E.new,
+                                        runge.kutta$I.new, runge.kutta$R.new)
+    
     }
     
     ## gψ(x(bt)t|x(bt−1)t−1)
-    # log.gx <- log(Px[particlesX[,t-1], X_ref[t]])
     log.gx <- log(Px[X_ref[t-1], X_ref[t]])
     
-    ## f(y_t|theta_t^{(b_t)}, x_t^{(b_t)}) x gψ(θt|θ(bt−1)t−1,x(bt)t) x gψ(x(bt)t|x(bt−1)t−1)x w^(bt−1)_(t-1)
+    ## fψ(y_t|theta_t^{(b_t)}, x_t^{(b_t)}) x gψ(θt|θ(bt−1)t−1,x(bt)t) x gψ(x(bt)t|x(bt−1)t−1)x w^(bt−1)_(t-1)
     log_w_as <- log(normalisedWeights[, t-1]) + log.fy + log.gtheta + log.gx
-    # log_w_as <- log.fy + log.gtheta + log.gx 
-    # log_w_as <- log.gtheta + log.gx + log(normalisedWeights[, t-1])
     normalize_w_as <- normalize_weight(log_w_as)  # Save the normalized weights
 
     # Replace a_t^(m) with b_{t-1} where m=x_t^(b_t)M
     m <- X_ref[t]*M
     ind[m] <- which(runif(1) < cumsum(normalize_w_as))[1]
-    # ind[m] <- sample(1:N, 1, prob = normalize_w_as)
-    AL[ ,t-1] <- ind  # Store indices of ancestral particles at time t-1
+
+    # Store indices of ancestral particles at time t-1
+    AL[ ,t-1] <- ind 
   
-    
     
     # Weighting step (avoid numerical instability)
     ## Get target transition probability

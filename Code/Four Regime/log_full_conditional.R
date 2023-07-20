@@ -1,6 +1,7 @@
 
 # Log Likelihood for BDSSSM-SEIR
 source("Update_SEIR_RK4.R")
+source("TransitionDensity.R")
 library("HiddenMarkov")
 
 log.full.conditional <- function(y, x,             # y_1:T x_0:T
@@ -49,10 +50,10 @@ log.full.conditional <- function(y, x,             # y_1:T x_0:T
                                    f[x[t]], pop.size)
     
     log.targ <- log.targ + dbeta(y[t], lambda*p*I[t], lambda*(1-p*I[t]), log=TRUE) +
-      DirichletReg::ddirichlet(matrix(c(S[t], E[t], I[t], R[t]), nrow = 1),
-                               alpha = kappa*c(runge.kutta$S.new, runge.kutta$E.new,
-                                               runge.kutta$I.new, runge.kutta$R.new),
-                               log = TRUE) 
+      log.trans.density(S[t], E[t], I[t], R[t], 
+                        kappa,
+                        runge.kutta$S.new, runge.kutta$E.new,
+                        runge.kutta$I.new, runge.kutta$R.new)
     
   }
   

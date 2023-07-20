@@ -149,8 +149,8 @@ CSMC.AS.repM <- function(y,
     
     # Ancestor sampling step: Draw b_{t-1} 
 
-    ## f(y_t|theta_t^{(b_t)}, x_t^{(b_t)})
-    log.fy <- dbeta(y[t], shape1 = lambda*p*I_ref[t], shape2 = lambda*(1-p*I_ref[t]), log = TRUE)      
+    ## fψ(y_t|theta_t^{(b_t)}, x_t^{(b_t)})
+    log.fy <- log.obs.density(y[t], I_ref[t], lambda, p)
     
     ## gψ(θt|θ(bt−1)t−1,x(bt)t)
     log.gtheta <- matrix(NA, nrow=N, ncol=1)
@@ -172,7 +172,7 @@ CSMC.AS.repM <- function(y,
     ## gψ(x(bt)t|x(bt−1)t−1)
     log.gx <- log(Px[X_ref[t-1], X_ref[t]])
     
-    ## hψ(y_t|theta_t^{(b_t)}, x_t^{(b_t)}) x gψ(θt|θ(bt−1)t−1,x(bt)t) x gψ(x(bt)t|x(bt−1)t−1)x w^(bt−1)_(t-1)
+    ## fψ(y_t|theta_t^{(b_t)}, x_t^{(b_t)}) x gψ(θt|θ(bt−1)t−1,x(bt)t) x gψ(x(bt)t|x(bt−1)t−1)x w^(bt−1)_(t-1)
     log_w_as <- log(normalisedWeights[, t-1]) + log.fy + log.gtheta + log.gx
     normalize_w_as <- normalize_weight(log_w_as)  # Save the normalized weights
 
